@@ -89,7 +89,7 @@ trait ContainerSpecSupport { this: CamelTestSupport =>
 
         msgs.filter { msg => !urisWithMinimum.contains(msg.uri) } match {
           case Nil => Nil
-          case l => List(new Exception("Received unexpected messages " + l.map(_.msg).mkString("[", ",", "]")))
+          case l => List(new Exception(s"Received [${l.size}] unexpected messages " + l.map(_.msg).mkString("[", "\n---\n", "]")))
         }
       }
 

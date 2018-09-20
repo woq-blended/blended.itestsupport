@@ -216,7 +216,7 @@ import Deps._
 // Blended Projects
 
 object Blended {
-  def blended(name: String) = BlendedVersions.blendedGroupId % name % BlendedVersions.blendedVersion
+  def blended(name: String) = BlendedVersions.blendedGroupId %% name % BlendedVersions.blendedVersion
 
   val activemqBrokerstarter = blended("blended.activemq.brokerstarter")
   val activemqClient = blended("blended.activemq.client")
