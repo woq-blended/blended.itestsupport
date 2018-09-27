@@ -13,10 +13,10 @@ addCommandAlias("ciRelease", s"""; clean; packageBin ; sonatypeOpen "Auto Releas
 
 inThisBuild(
   BuildHelper.readVersion(file("version.txt")) ++ Seq(
-    Global/useGpg := false,
-    Global/pgpPublicRing := baseDirectory.value / "project" / ".gnupg" / "pubring.gpg",
-    Global/pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg",
-    Global/pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
+    useGpg := false,
+    pgpPublicRing := baseDirectory.value / "project" / ".gnupg" / "pubring.gpg",
+    pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg",
+    pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
   )
 )
 
