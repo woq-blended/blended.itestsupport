@@ -3,6 +3,7 @@ import sbt.Keys._
 import xerial.sbt.Sonatype.SonatypeKeys._
 import com.typesafe.sbt.SbtScalariform.autoImport._
 import TestLogConfig.autoImport._
+import com.typesafe.sbt.SbtPgp.autoImport._
 
 object BlendedItestsupport {
 
@@ -87,6 +88,12 @@ object BlendedItestsupport {
       Test / testlogLogToFile := true,
 
       Test / resourceGenerators += (Test / testlogCreateConfig).taskValue
+    )
+    .settings(
+      Global/useGpg := false,
+      Global/pgpPublicRing := baseDirectory.value / "project" / ".gnupg" / "pubring.gpg",
+      Global/pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg",
+      Global/pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
     )
     .settings(PublishConfig.doPublish)
     .enablePlugins(TestLogConfig)
