@@ -1,14 +1,39 @@
 language: scala
 
 scala: 2.12.6
-  
+
 jdk: oraclejdk8
 
-script: 
-  - mvn clean install
+script:
+- sbt ciBuild
 
 cache:
   directories:
-  - $HOME/.m2
-  - $HOME/.ivy2
-  - $HOME/.sbt
+  - "$HOME/.m2"
+  - "$HOME/.ivy2"
+  - "$HOME/.sbt"
+
+before_cache:
+- rm -Rf $HOME/.ivy2/.sbt.ivy.lock ; rm -Rf $HOME/.ivy2/local ; rm -Rf $HOME/.m2/repository/de/wayofquality/blended
+
+env:
+  global:
+  - secure: "r048egec7DYp2HXockVYQOQru6FsxYZTABzEmTqZxOIRBpE3/c/km8TrSdKU32te7pZVryTGe2J6DK7xa2U2rHmu9H8Z7ah1a4CZzL0daFP8xZGXJ2aUby8Z++5eoav+CVzqyHWYKZtuB/DEhOlVsvx397rJVRhWIBBQVt5sgxY="
+  - secure: "b3aSUvpBixtHJ7EuxN5d7/sLzU6zXtD3OGyHXIDyfZWSnc55YOju89yZsfmj7Cnx2SqXvAuHIjb/bXwGtJg30f9LaR9EKueawkFpIBHKuPeEsJKoBAw2Uwu+si2Dn5Kb4joZZUwokJic4SnhmU5MmAI5YVdv6fzCyuBhY+zoFbA="
+  - secure: "cve0uZoMzRy5nEzkHWBTz651SBsVLvVNVZQDFoQGPaoDCXcICi+kqGKwP/9n4sgFwgvP6mJVZHYt5i9c8KqUmT1j7KtRzGirlqcj23QIUppt5v5XZLilVt6fSlvU97N008Y4xH3IEURhJGqSGhGTFrKxP3dvr9pnXCAQbqIDT0w="
+
+stages:
+- name: VerifyPublish
+  if: branch = publish AND type = push
+- Test
+- name: Deploy
+  if: branch = publish AND type = push
+
+jobs:
+  include:
+  - stage: VerifyPublish
+    script: ./verifyPublish.sh
+  - stage: Test
+    script: sbt ciBuild
+  - stage: Deploy
+    script: ./runPublish.sh
