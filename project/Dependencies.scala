@@ -6,6 +6,7 @@ object Dependencies {
   private[this] val akkaVersion = "2.5.9"
   private[this] val blendedCoreVersion = "2.6.0-M1-SNAPSHOT"
   private[this] val dockerJavaVersion = "3.0.13"
+  private[this] val camelVersion = "2.22.1"
 
   private[this] def akka(m: String) : ModuleID = "com.typesafe.akka" %% s"akka-${m}" % akkaVersion
   private[this] def blended(module: String) : ModuleID = "de.wayofquality.blended" %% module % blendedCoreVersion
@@ -22,6 +23,9 @@ object Dependencies {
   val blendedJolokia = blended("blended.jolokia")
   val blendedUtilLogging = blended("blended.util.logging")
   val blendedTestsupport = blended("blended.testsupport")
+
+  val camelCore = "org.apache.camel" % "camel-core" % camelVersion
+  val camelJms = "org.apache.camel" % "camel-jms" % camelVersion
 
   val commonsCompress = "org.apache.commons" % "commons-compress" % "1.13"
 
