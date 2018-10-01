@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
 
-  private[this] val activeMqVersion = "5.15.3"
+  private[this] val activeMqVersion = "5.15.6"
   private[this] val akkaVersion = "2.5.9"
   private[this] val blendedCoreVersion = "2.6.0-M1-SNAPSHOT"
   private[this] val dockerJavaVersion = "3.0.13"
