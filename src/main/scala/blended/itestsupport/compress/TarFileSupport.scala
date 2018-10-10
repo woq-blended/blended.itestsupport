@@ -67,7 +67,7 @@ object TarFileSupport {
     if (!file.exists()) throw new FileNotFoundException(file.getAbsolutePath())
 
     val bOut = new BufferedOutputStream(os)
-    var tarOut = new TarArchiveOutputStream(bOut)
+    val tarOut = new TarArchiveOutputStream(bOut)
 
     try {
       addFileToTar(tarOut, file, "")

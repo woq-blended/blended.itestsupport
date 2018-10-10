@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class ComposedCondition(condition: Condition*) extends Condition {
 
-  private var isSatisfied : AtomicBoolean = new AtomicBoolean(false)
+  private val isSatisfied : AtomicBoolean = new AtomicBoolean(false)
   override def satisfied = isSatisfied.get()
 }
 
