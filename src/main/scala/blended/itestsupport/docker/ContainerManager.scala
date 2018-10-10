@@ -38,7 +38,7 @@ class ContainerManager extends Actor with ActorLogging with Docker { this:  Dock
     
     case StartContainerManager(containers) => 
       
-      val requestor = sender 
+      val requestor = sender
       
       val externalCt = config.getBoolean("docker.external")
       log.info(s"Containers have been started externally: [$externalCt]")
@@ -50,15 +50,15 @@ class ContainerManager extends Actor with ActorLogging with Docker { this:  Dock
         case _ => (dockerHandler ? InternalStartContainers(configureDockerContainer(containers))) pipeTo self
       }
       
-      context.become(starting(dockerHandler, sender))
+      context.become(starting(dockerHandler, requestor))
   }
   
   def starting(dockerHandler: ActorRef, requestor: ActorRef) : Receive = LoggingReceive {
     case r : InternalContainersStarted => r.result match {
       case Right(cuts) => mapper ! InternalMapDockerContainers(self, cuts, client)
       case _ => requestor ! r.result
-    }  
-    case r : InternalDockerContainersMapped => 
+    }
+    case r : InternalDockerContainersMapped =>
       log.info(s"Container Manager started with docker attached docker containers: [${r.result}]")
       requestor ! ContainerManagerStarted(r.result)
       r.result match {
