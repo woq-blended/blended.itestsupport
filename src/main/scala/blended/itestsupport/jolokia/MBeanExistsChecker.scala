@@ -71,7 +71,7 @@ private[jolokia] object MBeanExistsChecker {
     user: Option[String] = None,
     pwd: Option[String] = None,
     searchDef: MBeanSearchDef
-  )(implicit system: ActorSystem) = new MBeanExistsChecker(url, user, pwd, searchDef)
+  ) = new MBeanExistsChecker(url, user, pwd, searchDef)
 }
 
 private[jolokia] class MBeanExistsChecker(
@@ -79,7 +79,7 @@ private[jolokia] class MBeanExistsChecker(
   userName: Option[String] = None,
   userPwd: Option[String] = None,
   searchDef : MBeanSearchDef
-)(implicit system:ActorSystem) extends JolokiaChecker(url, userName, userPwd) with JolokiaAssertion {
+) extends JolokiaChecker(url, userName, userPwd) with JolokiaAssertion {
 
   override def toString = s"MbeanExistsCondition(${url}, ${searchDef.pattern}})"
 

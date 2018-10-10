@@ -22,14 +22,14 @@ private[jolokia] object JolokiaAvailableChecker {
     url: String,
     userName: Option[String] = None,
     userPwd: Option[String] = None
-  )(implicit actorSys: ActorSystem) = new JolokiaAvailableChecker(url, userName, userPwd)
+  ) = new JolokiaAvailableChecker(url, userName, userPwd)
 }
 
 private[jolokia] class JolokiaAvailableChecker(
   url: String,
   userName: Option[String] = None,
   userPwd: Option[String] = None
-)(implicit system:ActorSystem) extends JolokiaChecker(url, userName, userPwd) with JolokiaAssertion {
+) extends JolokiaChecker(url, userName, userPwd) with JolokiaAssertion {
 
   override def toString = s"JolokiaAvailableCondition(${url})"
 
@@ -37,7 +37,7 @@ private[jolokia] class JolokiaAvailableChecker(
 
   override def assertJolokia = { msg =>
     msg match {
-      case v : JolokiaVersion =>
+      case v: JolokiaVersion =>
         log.info(s"Jolokia [$v] discovered.")
         true
       case _ => false
