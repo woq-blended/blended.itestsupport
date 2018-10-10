@@ -1,13 +1,13 @@
 package blended.itestsupport
 
-import java.net.{ServerSocket, Socket}
+import java.net.ServerSocket
 import java.util.concurrent.atomic.AtomicInteger
-
-import com.github.dockerjava.api.model.PortBinding
-import com.typesafe.config.Config
 
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
+
+import com.github.dockerjava.api.model.PortBinding
+import com.typesafe.config.Config
 
 object NamedContainerPort {
 

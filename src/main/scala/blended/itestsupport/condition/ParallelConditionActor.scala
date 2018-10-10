@@ -5,7 +5,6 @@ import akka.pattern._
 import blended.itestsupport.protocol._
 
 import scala.concurrent.Future
-import scala.language.postfixOps
 
 object ParallelConditionActor {
   def apply(condition: ParallelComposedCondition) =

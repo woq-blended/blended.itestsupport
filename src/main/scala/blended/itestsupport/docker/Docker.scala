@@ -1,7 +1,5 @@
 package blended.itestsupport.docker
 
-import java.io.File
-
 import akka.event.LoggingAdapter
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.{Container, Image}
