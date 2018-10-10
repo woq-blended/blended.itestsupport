@@ -15,7 +15,6 @@ object TarFileSupport {
 
   def untar(is : InputStream) : Map[String, Array[Byte]] = {
     val tar = new ArchiveStreamFactory().createArchiveInputStream(new BufferedInputStream(is))
-    val bytes = new Array[Byte](8192)
 
     val content : mutable.Map[String, Array[Byte]] = mutable.Map.empty
     var entry = Option(tar.getNextEntry())

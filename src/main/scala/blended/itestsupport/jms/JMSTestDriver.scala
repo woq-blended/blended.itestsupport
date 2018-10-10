@@ -6,7 +6,6 @@ import scala.util.{ Success, Try }
 import akka.actor.{ Actor, ActorLogging, ActorSystem, OneForOneStrategy, Props, SupervisorStrategy }
 import akka.actor.SupervisorStrategy.Restart
 import blended.jms.utils.{ BlendedJMSConnectionConfig, BlendedSingleConnectionFactory }
-import blended.util.logging.Logger
 import com.typesafe.config.ConfigFactory
 import javax.jms.ConnectionFactory
 
@@ -14,7 +13,6 @@ abstract class JMSTestDriver {
 
   val cf: ConnectionFactory
 
-  private[this] val log = Logger[JMSTestDriver]
   private[this] val system = ActorSystem("JMSTestDriver")
 
   private[this] val dummyResolver : String => Try[String] = { s => Success(s) }
