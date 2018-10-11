@@ -40,11 +40,11 @@ class BlendedTestContextManager extends Actor with ActorLogging with MemoryStash
           requestors.foreach(_ ! camelCtxt)
         case m => requestors.foreach(_ ! m)
       }
-    case req : TestContextRequest => context.become(starting(sender :: requestors, containerMgr))
+    case req : TestContextRequest => context.become(starting(sender() :: requestors, containerMgr))
   }
   
   def working(cuts: Map[String, ContainerUnderTest], testContext: CamelContext, containerMgr: ActorRef) : Receive = {
-    case req : TestContextRequest => sender ! testContext
+    case req : TestContextRequest => sender() ! testContext
     
     case ContainerReady_? => 
       implicit val eCtxt = context.system.dispatcher
@@ -62,7 +62,7 @@ class BlendedTestContextManager extends Actor with ActorLogging with MemoryStash
         case _ => ContainerReady(false)
       }.pipeTo(requestor)
 
-    case ConfiguredContainers_? => sender ! ConfiguredContainers(cuts)
+    case ConfiguredContainers_? => sender() ! ConfiguredContainers(cuts)
 
     case cc : ConfiguredContainer_? => sender() ! ConfiguredContainer(cuts.get(cc.ctName))
 
