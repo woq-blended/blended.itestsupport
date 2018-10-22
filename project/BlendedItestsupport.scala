@@ -58,7 +58,8 @@ object BlendedItestsupport {
         Dependencies.akkaActor,
         Dependencies.akkaCamel,
         Dependencies.akkaTestkit,
-        
+        Dependencies.akktHttpTestkit,
+
         Dependencies.camelCore, 
         Dependencies.camelJms,
 
@@ -69,6 +70,8 @@ object BlendedItestsupport {
 
         Dependencies.commonsCompress,
         Dependencies.dockerJava,
+
+        Dependencies.sttp,
 
         Dependencies.jolokiaJvmAgent % "runtime",
 

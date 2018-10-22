@@ -3,21 +3,24 @@ import sbt._
 object Dependencies {
 
   private[this] val activeMqVersion = "5.15.6"
+  private[this] val akkaHttpVersion = "10.1.1"
   private[this] val akkaVersion = "2.5.9"
   private[this] val blendedCoreVersion = "2.6.0-M2-SNAPSHOT"
   private[this] val dockerJavaVersion = "3.0.13"
   private[this] val camelVersion = "2.22.1"
 
   private[this] def akka(m: String) : ModuleID = "com.typesafe.akka" %% s"akka-${m}" % akkaVersion
+  private[this] def akka_Http(m: String) = "com.typesafe.akka" %% s"akka-${m}" % akkaHttpVersion
   private[this] def blended(module: String) : ModuleID = "de.wayofquality.blended" %% module % blendedCoreVersion
+
 
   val activeMqBroker = "org.apache.activemq" % "activemq-broker" % activeMqVersion
   val activeMqKahadbStore = "org.apache.activemq" % "activemq-kahadb-store" % activeMqVersion
-
   val akkaActor = akka("actor")
   val akkaCamel = akka("camel")
   val akkaSlf4j = akka("slf4j")
   val akkaTestkit = akka("testkit")
+  val akktHttpTestkit = akka_Http("http-testkit")
 
   val blendedJmsUtils = blended("blended.jms.utils")
   val blendedJolokia = blended("blended.jolokia")
@@ -38,4 +41,7 @@ object Dependencies {
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
   val mockitoAll = "org.mockito" % "mockito-all" % "1.9.5"
+
+  val sttp = "com.softwaremill.sttp" %% "core" % "1.3.7"
 }
+
