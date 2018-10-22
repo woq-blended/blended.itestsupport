@@ -35,6 +35,8 @@ trait BlendedIntegrationTestSupport {
   def containerReady(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): Unit = {
     val probe = new TestProbe(testKit.system)
     ctProxy.tell(ContainerReady_?, probe.ref)
+    // TODO: instead of just expecting the success, we should get the whole status
+    // to provide a much better error message about WHICH condition failed.
     probe.expectMsg(timeout.duration, ContainerReady(true))
   }
 

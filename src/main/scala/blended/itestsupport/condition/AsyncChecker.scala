@@ -5,6 +5,9 @@ import blended.itestsupport.protocol.CheckAsyncCondition
 
 import scala.concurrent.Future
 
+/**
+  * An Actor to be used by [[AsyncCondition]].
+  */
 abstract class AsyncChecker extends Actor with ActorLogging {
 
   protected implicit val ctxt = context.system.dispatcher
