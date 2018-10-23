@@ -23,16 +23,16 @@ class HttpChecker(url: String, responseCode: Int) extends AsyncChecker {
   override def performCheck(condition: AsyncCondition): Future[Boolean] = {
     val promise = Promise[Boolean]()
 
-      Future {
+    Future {
       val request = sttp.get(uri"${url}")
       implicit val backend = HttpURLConnectionBackend()
       val response = request.send()
       log.debug(s"Response: [${response}]")
       response.code
-    } .onComplete {
-        case Success(code) => promise.success(responseCode == code)
-        case Failure(e) => promise.success(false)
-      }
+    }.onComplete {
+      case Success(code) => promise.success(responseCode == code)
+      case Failure(e) => promise.success(false)
+    }
     promise.future
   }
 }
