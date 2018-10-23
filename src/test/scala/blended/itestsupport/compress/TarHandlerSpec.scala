@@ -2,13 +2,10 @@ package blended.itestsupport.compress
 
 import java.io.{ ByteArrayInputStream, File, InputStream }
 
-import blended.util.logging.Logger
 import org.fusesource.hawtbuf.ByteArrayOutputStream
 import org.scalatest.{ FreeSpec, Matchers }
 
 class TarHandlerSpec extends FreeSpec with Matchers {
-
-  private[this] val log = Logger[TarHandlerSpec]
 
   "The Tar file handler" - {
 

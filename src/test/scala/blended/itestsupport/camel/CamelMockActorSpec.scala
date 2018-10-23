@@ -47,7 +47,7 @@ class CamelMockActorSpec extends WordSpec
     "Should notify upon reception of a message on the event bus" in TestActorSys { testkit =>
       implicit val system = testkit.system
 
-      val mock = mockActor("b") 
+      mockActor("b")
       val p = producer("b")
       
       val probe = createProbe()

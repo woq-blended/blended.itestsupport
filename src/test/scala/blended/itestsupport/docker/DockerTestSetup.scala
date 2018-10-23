@@ -4,6 +4,8 @@ import java.util
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 
+import scala.collection.JavaConverters._
+
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.command._
 import com.github.dockerjava.api.model._
@@ -12,7 +14,6 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 
-import scala.collection.convert.WrapAsJava._
 
 trait DockerTestSetup { this : MockitoSugar =>
   
@@ -28,7 +29,7 @@ trait DockerTestSetup { this : MockitoSugar =>
     when(img.getId) thenReturn(id)
     when(img.getRepoTags) thenReturn Array ( s"atooni/$ctName:latest" )
     img
-  }.toSeq 
+  }.toSeq.asJava
   
   val portNumber = new AtomicInteger(45000)
   

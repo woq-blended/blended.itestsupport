@@ -4,7 +4,6 @@ import akka.testkit.{TestActorRef, TestProbe}
 import blended.itestsupport.condition.ConditionProvider._
 import blended.testsupport.TestActorSys
 import org.scalatest.{Matchers, WordSpec}
-import scala.concurrent.duration._
 
 import blended.itestsupport.condition.ConditionActor.CheckCondition
 import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
@@ -13,8 +12,6 @@ class ComposedConditionSpec extends WordSpec
   with Matchers {
 
   "A composed condition" should {
-
-    val timeout = 2.seconds
 
     "be satisfied with an empty condition list" in TestActorSys { testkit =>
       implicit val system = testkit.system
