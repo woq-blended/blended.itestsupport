@@ -3,9 +3,9 @@ package blended.itestsupport.condition
 import java.util.concurrent.atomic.AtomicBoolean
 
 import akka.actor.{ActorRef, ActorSystem, Props}
-import blended.itestsupport.protocol.CheckAsyncCondition
-
 import scala.concurrent.duration.FiniteDuration
+
+import blended.itestsupport.condition.AsyncChecker.CheckAsyncCondition
 
 object AsyncCondition {
   def apply(

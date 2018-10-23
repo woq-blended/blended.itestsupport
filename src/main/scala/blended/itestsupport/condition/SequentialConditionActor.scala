@@ -3,7 +3,8 @@ package blended.itestsupport.condition
 import scala.concurrent.ExecutionContextExecutor
 
 import akka.actor._
-import blended.itestsupport.protocol._
+import blended.itestsupport.condition.ConditionActor.CheckCondition
+import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 
 object SequentialConditionActor {
   def props(cond: SequentialComposedCondition): Props = Props(new SequentialConditionActor(cond))
@@ -33,8 +34,8 @@ class SequentialConditionActor(condition: SequentialComposedCondition) extends A
       remaining match {
         case Nil =>
           log.debug(s"Successfully processed [${processed.size}] conditions.")
-          checkingFor ! new ConditionCheckResult(processed.reverse, List.empty[Condition])
-          context stop self
+          checkingFor ! new ConditionCheckResult(processed.reverse, List.empty)
+          context.stop(self)
         case x :: xs =>
           remaining = xs
           val subChecker = context.actorOf(ConditionActor.props(x))
@@ -54,5 +55,5 @@ class SequentialConditionActor(condition: SequentialComposedCondition) extends A
 
   }
 
-  override def toString = s"${getClass().getSimpleName()}(${condition}]"
+  override def toString() = s"${getClass().getSimpleName()}(${condition}]"
 }

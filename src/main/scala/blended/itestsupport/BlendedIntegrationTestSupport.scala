@@ -11,11 +11,12 @@ import akka.testkit.{TestKit, TestProbe}
 import akka.util.Timeout
 import akka.util.Timeout.durationToTimeout
 import blended.itestsupport.BlendedTestContextManager.{ConfiguredContainer, ConfiguredContainer_?, ContainerReady, ContainerReady_?}
+import blended.itestsupport.TestContextCreator.TestContextRequest
 import blended.itestsupport.compress.TarFileSupport
+import blended.itestsupport.condition.ConditionActor.CheckCondition
+import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 import blended.itestsupport.condition.{Condition, ConditionActor}
 import blended.itestsupport.docker.protocol._
-import blended.itestsupport.protocol._
-import blended.itestsupport.protocol.TestContextRequest
 import blended.util.logging.Logger
 import org.apache.camel.CamelContext
 
@@ -23,7 +24,7 @@ trait BlendedIntegrationTestSupport {
 
   private[this] val logger = Logger[BlendedIntegrationTestSupport]
 
-  val testOutput = System.getProperty("projectTestOutput", "")
+  val testOutput: String = System.getProperty("projectTestOutput", "")
 
   def testContext(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): CamelContext = {
     val probe = new TestProbe(testKit.system)
@@ -38,10 +39,16 @@ trait BlendedIntegrationTestSupport {
     // TODO: instead of just expecting the success, we should get the whole status
     // to provide a much better error message about WHICH condition failed.
     try {
-      probe.expectMsg(timeout.duration, ContainerReady(true))
+      //      probe.expectMsg(timeout.duration, ContainerReady(true))
+      probe.expectMsgPF(timeout.duration) {
+        case ContainerReady(true, _, _) => // all good
+        case ContainerReady(false, good, bad) => // bad
+          throw new AssertionError(s"The container is not ready. Reasons:\n  ${bad.mkString("\n  ")}")
+      }
     } catch {
       case e: AssertionError =>
-        logger.error(e)("Container setup didn't finish successfully within timeout.")
+        logger.error(e)("Container setup didn't finish successfully within timeout.\n" +
+          "To get better error logging, reduce the timeout of the conditions and/or increase the timeout of this `containerReady` call.")
         val extendedStatus = "\nRefer to log file to find out which condition failed."
         throw new AssertionError(e.getMessage() + extendedStatus, e.getCause())
     }
@@ -50,7 +57,7 @@ trait BlendedIntegrationTestSupport {
   def stopContainers(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): Unit = {
     val probe = new TestProbe(testKit.system)
     testKit.system.log.debug(s"stopProbe [${probe.ref}]")
-    ctProxy.tell(new StopContainerManager(timeout.duration), probe.ref)
+    ctProxy.tell(StopContainerManager(timeout.duration), probe.ref)
     probe.expectMsg(timeout.duration, ContainerManagerStopped)
   }
 
@@ -126,11 +133,9 @@ trait BlendedIntegrationTestSupport {
 
     val checker = testKit.system.actorOf(ConditionActor.props(condition))
 
-    val checkFuture = (checker ? CheckCondition)(condition.timeout).map { result =>
-      result match {
-        case cr: ConditionCheckResult => cr.allSatisfied
-        case _ => false
-      }
+    val checkFuture = (checker ? CheckCondition)(condition.timeout).map {
+      case cr: ConditionCheckResult => cr.allSatisfied
+      case _ => false
     }
 
     Await.result(checkFuture, condition.timeout)

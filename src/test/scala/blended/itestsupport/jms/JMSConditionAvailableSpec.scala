@@ -16,9 +16,10 @@
 
 package blended.itestsupport.jms
 
-import akka.testkit.{TestProbe, TestActorRef}
+import akka.testkit.{TestActorRef, TestProbe}
 import blended.itestsupport.condition.ConditionActor
-import blended.itestsupport.protocol._
+import blended.itestsupport.condition.ConditionActor.CheckCondition
+import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 import blended.testsupport.TestActorSys
 import org.apache.activemq.ActiveMQConnectionFactory
 

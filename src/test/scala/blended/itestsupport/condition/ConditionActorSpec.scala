@@ -1,8 +1,9 @@
 package blended.itestsupport.condition
 
-import akka.testkit.{TestProbe, ImplicitSender, TestActorRef}
+import akka.testkit.{TestActorRef, TestProbe}
+import blended.itestsupport.condition.ConditionActor.CheckCondition
+import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 import blended.itestsupport.condition.ConditionProvider._
-import blended.itestsupport.protocol._
 import blended.testsupport.TestActorSys
 import org.scalatest.{Matchers, WordSpec}
 

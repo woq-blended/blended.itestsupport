@@ -2,7 +2,6 @@ package blended.itestsupport.condition
 
 import akka.actor.Props
 import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable}
-import blended.itestsupport.protocol._
 
 object ConditionActor {
   def props(cond: Condition): Props = cond match {
@@ -10,9 +9,39 @@ object ConditionActor {
     case sc: SequentialComposedCondition => SequentialConditionActor.props(sc)
     case _ => Props(new ConditionActor(cond))
   }
+
+  /**
+   * Use this object to query an actor that encapsulates a condition.
+   */
+  case object CheckCondition
+
+  /**
+   * This message collects the results of nested Conditions
+   */
+  case class ConditionCheckResult(satisfied: List[Condition], timedOut: List[Condition]) {
+    def allSatisfied: Boolean = timedOut.isEmpty
+
+    def reportTimeouts: String =
+      timedOut.mkString(
+        s"\nA total of [${timedOut.size}] conditions have timed out", "\n", ""
+      )
+
+    override def toString(): String = s"${getClass().getSimpleName()}(satisfied=${satisfied},timedOut=${timedOut})}"
+  }
+
+  object ConditionCheckResult {
+    def apply(results: List[ConditionCheckResult]) = {
+      new ConditionCheckResult(
+        results.map { r => r.satisfied }.flatten,
+        results.map { r => r.timedOut }.flatten
+      )
+    }
+  }
+
 }
 
 class ConditionActor(cond: Condition) extends Actor with ActorLogging {
+  import ConditionActor._
 
   case object Tick
 
@@ -45,7 +74,7 @@ class ConditionActor(cond: Condition) extends Actor with ActorLogging {
       case true =>
         log.info(s"Condition [${cond}] is now satisfied.")
         timer.cancel()
-        val response = ConditionCheckResult(List(cond), List.empty[Condition])
+        val response = ConditionCheckResult(List(cond), List.empty)
         log.debug(s"Answering [${response}] to [${checkingFor}]")
         checkingFor ! response
         context.stop(self)
@@ -55,7 +84,7 @@ class ConditionActor(cond: Condition) extends Actor with ActorLogging {
     case Tick =>
       log.info(s"Condition [${cond}] hast timed out.")
       log.debug(s"Answering to [${checkingFor}]")
-      checkingFor ! ConditionCheckResult(List.empty[Condition], List(cond))
+      checkingFor ! ConditionCheckResult(List.empty, List(cond))
       context.stop(self)
   }
 }

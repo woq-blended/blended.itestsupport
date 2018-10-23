@@ -1,13 +1,14 @@
 package blended.itestsupport.condition.jolokia
 
-import akka.testkit.{TestProbe, TestActorRef}
+import akka.testkit.{TestActorRef, TestProbe}
 import blended.itestsupport.condition.{Condition, ConditionActor}
 import blended.itestsupport.jolokia.JolokiaAvailableCondition
-import blended.itestsupport.protocol._
 import blended.testsupport.TestActorSys
-import org.scalatest.{WordSpec, Matchers}
-
+import org.scalatest.{Matchers, WordSpec}
 import scala.concurrent.duration._
+
+import blended.itestsupport.condition.ConditionActor.CheckCondition
+import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 
 class JolokiaConditionSpec extends WordSpec
   with Matchers {

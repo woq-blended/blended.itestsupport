@@ -40,6 +40,8 @@ class HttpChecker(url: String, responseCode: Int) extends AsyncChecker {
 object HttpChecker {
   /**
    * Create the actor props.
+   * @param url The URL to check.
+   * @param resultCode The expected result code.
    */
   def props(url: String, resultCode: Int = 200): Props = Props(new HttpChecker(url, resultCode))
 

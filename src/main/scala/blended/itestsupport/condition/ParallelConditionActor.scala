@@ -4,8 +4,10 @@ import scala.concurrent.ExecutionContextExecutor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.pattern._
-import blended.itestsupport.protocol._
 import scala.concurrent.Future
+
+import blended.itestsupport.condition.ConditionActor.CheckCondition
+import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 
 object ParallelConditionActor {
   def props(condition: ParallelComposedCondition): Props = Props(new ParallelConditionActor(condition))
@@ -55,5 +57,5 @@ class ParallelConditionActor(condition: ParallelComposedCondition) extends Actor
     }
   }
 
-  override def toString = s"${getClass().getSimpleName()}(${condition})"
+  override def toString() = s"${getClass().getSimpleName()}(${condition})"
 }

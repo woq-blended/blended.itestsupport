@@ -1,10 +1,10 @@
 package blended.itestsupport.condition
 
-import akka.actor.Props
-import akka.testkit.{TestProbe, TestActorRef}
-import blended.itestsupport.protocol._
+import akka.testkit.{TestActorRef, TestProbe}
+import blended.itestsupport.condition.ConditionActor.CheckCondition
+import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 import blended.testsupport.TestActorSys
-import org.scalatest.{Matchers, WordSpec, WordSpecLike}
+import org.scalatest.{Matchers, WordSpec}
 
 class SequentialCheckerSpec extends WordSpec
   with Matchers {

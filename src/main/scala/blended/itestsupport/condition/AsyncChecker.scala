@@ -1,32 +1,34 @@
 package blended.itestsupport.condition
 
 import akka.actor.{Actor, ActorLogging}
-import blended.itestsupport.protocol.CheckAsyncCondition
 
 import scala.concurrent.Future
 
 /**
-  * An Actor to be used by [[AsyncCondition]].
-  */
+ * An Actor to be used by [[AsyncCondition]].
+ */
 abstract class AsyncChecker extends Actor with ActorLogging {
+
+  import AsyncChecker._
 
   protected implicit val ctxt = context.system.dispatcher
 
   case object Tick
+
   case object Stop
 
-  def performCheck(condition: AsyncCondition) : Future[Boolean]
+  def performCheck(condition: AsyncCondition): Future[Boolean]
 
   def receive = initializing
 
-  def initializing : Receive = {
+  def initializing: Receive = {
     case CheckAsyncCondition(condition) =>
       log.debug("Starting asynchronous condition checker")
       self ! Tick
       context.become(checking(condition))
   }
 
-  def checking(condition: AsyncCondition) : Receive = {
+  def checking(condition: AsyncCondition): Receive = {
     case Tick =>
       log.debug(s"Checking asynchronous [${condition.description}] condition ....")
       performCheck(condition).map(_ match {
@@ -39,4 +41,13 @@ abstract class AsyncChecker extends Actor with ActorLogging {
           context.system.scheduler.scheduleOnce(condition.interval, self, Tick)
       })
   }
+}
+
+object AsyncChecker {
+
+  /**
+   * Use this object to kick off an Asynchronous checker.
+   */
+  case class CheckAsyncCondition(condition: AsyncCondition)
+
 }

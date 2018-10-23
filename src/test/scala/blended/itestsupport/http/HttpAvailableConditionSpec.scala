@@ -8,8 +8,8 @@ import akka.testkit.TestActorRef
 import akka.testkit.TestProbe
 import blended.itestsupport.condition.Condition
 import blended.itestsupport.condition.ConditionActor
-import blended.itestsupport.protocol.CheckCondition
-import blended.itestsupport.protocol.ConditionCheckResult
+import blended.itestsupport.condition.ConditionActor.CheckCondition
+import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 import blended.testsupport.TestActorSys
 import blended.testsupport.scalatest.LoggingFreeSpec
 
