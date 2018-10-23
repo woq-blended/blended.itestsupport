@@ -6,7 +6,7 @@ import akka.actor._
 import blended.itestsupport.protocol._
 
 object SequentialConditionActor {
-  def apply(cond: SequentialComposedCondition) = new SequentialConditionActor(cond)
+  def props(cond: SequentialComposedCondition): Props = Props(new SequentialConditionActor(cond))
 }
 
 class SequentialConditionActor(condition: SequentialComposedCondition) extends Actor with ActorLogging {
@@ -37,7 +37,7 @@ class SequentialConditionActor(condition: SequentialComposedCondition) extends A
           context stop self
         case x :: xs =>
           remaining = xs
-          val subChecker = context.actorOf(Props(ConditionActor(x)))
+          val subChecker = context.actorOf(ConditionActor.props(x))
           subChecker ! CheckCondition
       }
 

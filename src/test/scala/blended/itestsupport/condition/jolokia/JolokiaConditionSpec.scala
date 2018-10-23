@@ -1,12 +1,11 @@
 package blended.itestsupport.condition.jolokia
 
-import akka.actor.Props
 import akka.testkit.{TestProbe, TestActorRef}
 import blended.itestsupport.condition.{Condition, ConditionActor}
 import blended.itestsupport.jolokia.JolokiaAvailableCondition
 import blended.itestsupport.protocol._
 import blended.testsupport.TestActorSys
-import org.scalatest.{WordSpec, Matchers, WordSpecLike}
+import org.scalatest.{WordSpec, Matchers}
 
 import scala.concurrent.duration._
 
@@ -23,7 +22,7 @@ class JolokiaConditionSpec extends WordSpec
 
       val condition = JolokiaAvailableCondition("http://localhost:7777/jolokia", Some(t))
 
-      val checker = TestActorRef(Props(ConditionActor(cond = condition)))
+      val checker = TestActorRef(ConditionActor.props(cond = condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(t, ConditionCheckResult(List(condition), List.empty[Condition]))
@@ -37,7 +36,7 @@ class JolokiaConditionSpec extends WordSpec
 
       val condition = JolokiaAvailableCondition("http://localhost:8888/jolokia", Some(t))
 
-      val checker = TestActorRef(Props(ConditionActor(cond = condition)))
+      val checker = TestActorRef(ConditionActor.props(cond = condition))
       checker.tell(CheckCondition, probe.ref)
       probe.expectMsg(t + 1.second, ConditionCheckResult(List.empty[Condition], List(condition)))
     }

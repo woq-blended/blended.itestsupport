@@ -1,18 +1,18 @@
 package blended.itestsupport
 
-import java.io.{ ByteArrayOutputStream, File, FileOutputStream }
+import java.io.{ByteArrayOutputStream, File, FileOutputStream}
 
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.FiniteDuration
 
-import akka.actor.{ ActorRef, Props }
+import akka.actor.ActorRef
 import akka.pattern.ask
-import akka.testkit.{ TestKit, TestProbe }
+import akka.testkit.{TestKit, TestProbe}
 import akka.util.Timeout
 import akka.util.Timeout.durationToTimeout
-import blended.itestsupport.BlendedTestContextManager.{ ConfiguredContainer, ConfiguredContainer_?, ContainerReady, ContainerReady_? }
+import blended.itestsupport.BlendedTestContextManager.{ConfiguredContainer, ConfiguredContainer_?, ContainerReady, ContainerReady_?}
 import blended.itestsupport.compress.TarFileSupport
-import blended.itestsupport.condition.{ Condition, ConditionActor }
+import blended.itestsupport.condition.{Condition, ConditionActor}
 import blended.itestsupport.docker.protocol._
 import blended.itestsupport.protocol._
 import blended.itestsupport.protocol.TestContextRequest
@@ -37,7 +37,14 @@ trait BlendedIntegrationTestSupport {
     ctProxy.tell(ContainerReady_?, probe.ref)
     // TODO: instead of just expecting the success, we should get the whole status
     // to provide a much better error message about WHICH condition failed.
-    probe.expectMsg(timeout.duration, ContainerReady(true))
+    try {
+      probe.expectMsg(timeout.duration, ContainerReady(true))
+    } catch {
+      case e: AssertionError =>
+        logger.error(e)("Container setup didn't finish successfully within timeout.")
+        val extendedStatus = "\nRefer to log file to find out which condition failed."
+        throw new AssertionError(e.getMessage() + extendedStatus, e.getCause())
+    }
   }
 
   def stopContainers(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): Unit = {
@@ -117,7 +124,7 @@ trait BlendedIntegrationTestSupport {
 
     implicit val eCtxt = testKit.system.dispatcher
 
-    val checker = testKit.system.actorOf(Props(ConditionActor(condition)))
+    val checker = testKit.system.actorOf(ConditionActor.props(condition))
 
     val checkFuture = (checker ? CheckCondition)(condition.timeout).map { result =>
       result match {

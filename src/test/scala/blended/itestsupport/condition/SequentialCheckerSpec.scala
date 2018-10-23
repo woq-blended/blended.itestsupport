@@ -16,7 +16,7 @@ class SequentialCheckerSpec extends WordSpec
       val probe = TestProbe()
 
       val condition = new SequentialComposedCondition()
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(List.empty[Condition], List.empty[Condition]))
@@ -29,7 +29,7 @@ class SequentialCheckerSpec extends WordSpec
       val conditions = (1 to 1).map { i => new AlwaysTrue() }.toList
       val condition = new SequentialComposedCondition(conditions.toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(conditions, List.empty[Condition]))
@@ -42,7 +42,7 @@ class SequentialCheckerSpec extends WordSpec
       val conditions = (1 to 5).map { i => new AlwaysTrue() }.toList
       val condition = new SequentialComposedCondition(conditions.toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(conditions, List.empty[Condition]))
@@ -55,7 +55,7 @@ class SequentialCheckerSpec extends WordSpec
       val conditions = (1 to 1).map { i => new NeverTrue() }.toList
       val condition = new SequentialComposedCondition(conditions.toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(List.empty[Condition], conditions))
@@ -68,7 +68,7 @@ class SequentialCheckerSpec extends WordSpec
       val conditions = (1 to 5).map { i => new NeverTrue() }.toList
       val condition = new SequentialComposedCondition(conditions.toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(List.empty[Condition], conditions))
@@ -87,7 +87,7 @@ class SequentialCheckerSpec extends WordSpec
 
       val condition = new SequentialComposedCondition((trueConditions ::: remainingConditions).toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(trueConditions, remainingConditions))

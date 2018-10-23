@@ -16,7 +16,6 @@
 
 package blended.itestsupport.jms
 
-import akka.actor.Props
 import akka.testkit.{TestProbe, TestActorRef}
 import blended.itestsupport.condition.ConditionActor
 import blended.itestsupport.protocol._
@@ -34,7 +33,7 @@ class JMSConditionAvailableSpec extends AbstractJMSSpec {
       val cf = new ActiveMQConnectionFactory("vm://foo?create=false")
       val condition = JMSAvailableCondition(cf)
 
-      val checker = TestActorRef(Props(ConditionActor(cond = condition)))
+      val checker = TestActorRef(ConditionActor.props(cond = condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(List.empty, List(condition)))
@@ -47,7 +46,7 @@ class JMSConditionAvailableSpec extends AbstractJMSSpec {
       val cf = new ActiveMQConnectionFactory("vm://blended?create=false")
       val condition = JMSAvailableCondition(cf)
 
-      val checker = TestActorRef(Props(ConditionActor(cond = condition)))
+      val checker = TestActorRef(ConditionActor.props(cond = condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(List(condition), List.empty))

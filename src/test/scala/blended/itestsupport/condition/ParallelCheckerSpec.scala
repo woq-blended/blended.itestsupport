@@ -1,6 +1,5 @@
 package blended.itestsupport.condition
 
-import akka.actor.Props
 import akka.testkit.{TestActorRef, TestProbe}
 import blended.itestsupport.protocol._
 import blended.testsupport.TestActorSys
@@ -15,7 +14,7 @@ class ParallelCheckerSpec extends WordSpec
       implicit val system = testkit.system
       val probe = TestProbe()
 
-      val checker = TestActorRef(Props(ConditionActor(ParallelComposedCondition())))
+      val checker = TestActorRef(ConditionActor.props(ParallelComposedCondition()))
       checker.tell(CheckCondition, probe.ref)
       probe.expectMsg(ConditionCheckResult(List.empty[Condition], List.empty[Condition]))
     }
@@ -27,7 +26,7 @@ class ParallelCheckerSpec extends WordSpec
       val conditions = (1 to 1).map { i => new AlwaysTrue() }.toList
       val condition = ParallelComposedCondition(conditions.toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(conditions, List.empty[Condition]))
@@ -40,7 +39,7 @@ class ParallelCheckerSpec extends WordSpec
       val conditions = (1 to 5).map { i => new AlwaysTrue() }.toList
       val condition = ParallelComposedCondition(conditions.toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(conditions, List.empty[Condition]))
@@ -53,7 +52,7 @@ class ParallelCheckerSpec extends WordSpec
       val conditions = (1 to 1).map { i => new NeverTrue() }.toList
       val condition = ParallelComposedCondition(conditions.toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(List.empty[Condition], conditions))
@@ -72,7 +71,7 @@ class ParallelCheckerSpec extends WordSpec
       )
       val condition = ParallelComposedCondition(conditions.toSeq:_*)
 
-      val checker = TestActorRef(Props(ConditionActor(condition)))
+      val checker = TestActorRef(ConditionActor.props(condition))
       checker.tell(CheckCondition, probe.ref)
 
       probe.expectMsg(ConditionCheckResult(

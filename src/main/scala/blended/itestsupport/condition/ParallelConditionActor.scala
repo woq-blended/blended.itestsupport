@@ -8,8 +8,7 @@ import blended.itestsupport.protocol._
 import scala.concurrent.Future
 
 object ParallelConditionActor {
-  def apply(condition: ParallelComposedCondition) =
-    new ParallelConditionActor(condition)
+  def props(condition: ParallelComposedCondition): Props = Props(new ParallelConditionActor(condition))
 }
 
 class ParallelConditionActor(condition: ParallelComposedCondition) extends Actor with ActorLogging {
@@ -48,7 +47,7 @@ class ParallelConditionActor(condition: ParallelComposedCondition) extends Actor
   private def checker: Seq[Future[Any]] = condition.conditions.toSeq.map { c =>
     (
       c, // Keep the condition under check in the context
-      context.actorOf(Props(ConditionActor(c))) // The actor checking a single condition
+      context.actorOf(ConditionActor.props(c)) // The actor checking a single condition
     )
   }.map { p =>
     (p._2 ? CheckCondition)(p._1.timeout).recover {

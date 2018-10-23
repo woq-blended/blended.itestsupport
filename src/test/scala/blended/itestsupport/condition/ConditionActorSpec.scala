@@ -1,6 +1,5 @@
 package blended.itestsupport.condition
 
-import akka.actor.Props
 import akka.testkit.{TestProbe, ImplicitSender, TestActorRef}
 import blended.itestsupport.condition.ConditionProvider._
 import blended.itestsupport.protocol._
@@ -17,7 +16,7 @@ class ConditionActorSpec extends WordSpec
       val probe = TestProbe()
 
       val c = alwaysTrue
-      val checker = TestActorRef(Props(ConditionActor(cond = c)))
+      val checker = TestActorRef(ConditionActor.props(cond = c))
       checker.tell(CheckCondition, probe.ref)
       probe.expectMsg(ConditionCheckResult(List(c), List.empty[Condition]))
     }
@@ -27,7 +26,7 @@ class ConditionActorSpec extends WordSpec
       val probe = TestProbe()
 
       val c = neverTrue
-      val checker = TestActorRef(Props(ConditionActor(cond = c)))
+      val checker = TestActorRef(ConditionActor.props(cond = c))
       checker.tell(CheckCondition, probe.ref)
       probe.expectMsg(ConditionCheckResult(List.empty[Condition],List(c)))
     }
@@ -37,7 +36,7 @@ class ConditionActorSpec extends WordSpec
       val probe = TestProbe()
 
       val pc = ParallelComposedCondition(alwaysTrue, alwaysTrue)
-      val checker = TestActorRef(Props(ConditionActor(pc)))
+      val checker = TestActorRef(ConditionActor.props(pc))
 
       checker.tell(CheckCondition, probe.ref)
       probe.expectMsg(ConditionCheckResult(pc.conditions.toList, List.empty[Condition]))

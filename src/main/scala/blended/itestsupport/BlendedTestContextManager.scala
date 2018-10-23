@@ -55,7 +55,7 @@ class BlendedTestContextManager extends Actor with ActorLogging with MemoryStash
       
       log.info(s"Waiting for container condition(s) [$condition}]")
       
-      val checker = context.system.actorOf(Props(ConditionActor(condition)))
+      val checker = context.system.actorOf(ConditionActor.props(condition))
 
       (checker ? CheckCondition)(condition.timeout).map {
         case cr: ConditionCheckResult => ContainerReady(cr.allSatisfied)
