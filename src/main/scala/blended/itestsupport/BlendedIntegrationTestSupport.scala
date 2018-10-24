@@ -100,14 +100,16 @@ trait BlendedIntegrationTestSupport {
   def saveContainerDirectory(baseDir: String, dir: ContainerDirectory): Unit = {
     dir.content.foreach {
       case (name, content) =>
-        val file = new File(s"$baseDir/$name")
-        file.getParentFile().mkdirs()
-
         if (content.size > 0) {
+          val file = new File(s"$baseDir/$name")
+          file.getParentFile().mkdirs()
           val fos = new FileOutputStream(file)
-          fos.write(content)
-          fos.flush()
-          fos.close()
+          try {
+            fos.write(content)
+            fos.flush()
+          } finally {
+            fos.close()
+          }
         }
     }
   }
