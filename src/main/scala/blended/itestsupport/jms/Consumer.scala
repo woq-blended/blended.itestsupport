@@ -1,12 +1,10 @@
 package blended.itestsupport.jms
 
-import javax.jms._
-
 import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable}
 import akka.event.LoggingReceive
-import blended.util.protocol.IncrementCounter
 import blended.itestsupport.jms.protocol._
 import blended.jms.utils.JMSSupport
+import javax.jms._
 
 import scala.concurrent.duration._
 
@@ -61,9 +59,8 @@ object Consumer {
   def apply(
     connection: Connection,
     destName: String,
-    subscriberName: Option[String],
-    msgCounter : Option[ActorRef] = None
-  ) = new Consumer(connection, destName, subscriberName, msgCounter)
+    subscriberName: Option[String]
+  ) = new Consumer(connection, destName, subscriberName)
 
   case object MsgTimeout
   case object ConsumerCreated
@@ -73,8 +70,7 @@ object Consumer {
 class Consumer(
   connection: Connection,
   destName: String,
-  subscriberName: Option[String],
-  msgCounter: Option[ActorRef]
+  subscriberName: Option[String]
 ) extends Actor with ActorLogging {
 
   import blended.itestsupport.jms.Consumer.{ConsumerCreated, MsgTimeout}
@@ -105,7 +101,6 @@ class Consumer(
         case txtMsg : TextMessage => log.debug(s"Received message ... [${msg.asInstanceOf[TextMessage].getText}]")
         case jmsMsg => log.debug(s"Received message ... [$jmsMsg]")
       }
-      msgCounter.foreach { counter => counter ! IncrementCounter(1) }
       resetTimer()
     case Unsubscribe =>
       log.info(s"Unsubscribing [$subscriberName]")
