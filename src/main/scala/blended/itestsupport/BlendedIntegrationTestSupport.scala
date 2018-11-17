@@ -2,23 +2,22 @@ package blended.itestsupport
 
 import java.io.{ByteArrayOutputStream, File, FileOutputStream}
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.FiniteDuration
-
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.testkit.{TestKit, TestProbe}
 import akka.util.Timeout
 import akka.util.Timeout.durationToTimeout
-import blended.itestsupport.BlendedTestContextManager.{ConfiguredContainer, ConfiguredContainer_?, ContainerReady, ContainerReady_?}
+import blended.itestsupport.BlendedTestContextManager._
 import blended.itestsupport.TestContextCreator.TestContextRequest
 import blended.itestsupport.compress.TarFileSupport
-import blended.itestsupport.condition.ConditionActor.CheckCondition
-import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
+import blended.itestsupport.condition.ConditionActor.{CheckCondition, ConditionCheckResult}
 import blended.itestsupport.condition.{Condition, ConditionActor}
 import blended.itestsupport.docker.protocol._
 import blended.util.logging.Logger
 import org.apache.camel.CamelContext
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{Await, Future}
 
 trait BlendedIntegrationTestSupport {
 
@@ -28,18 +27,18 @@ trait BlendedIntegrationTestSupport {
 
   def testContext(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): CamelContext = {
     val probe = new TestProbe(testKit.system)
-    val cuts = ContainerUnderTest.containerMap(testKit.system.settings.config)
+    val cuts : Map[String, ContainerUnderTest] = ContainerUnderTest.containerMap(testKit.system.settings.config)
     ctProxy.tell(TestContextRequest(cuts), probe.ref)
     probe.receiveN(1, timeout.duration).head.asInstanceOf[CamelContext]
   }
 
-  def containerReady(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): Unit = {
+  def containerReady(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): Future[Map[String, ContainerUnderTest]] = {
     val probe = new TestProbe(testKit.system)
+
     ctProxy.tell(ContainerReady_?, probe.ref)
     // TODO: instead of just expecting the success, we should get the whole status
     // to provide a much better error message about WHICH condition failed.
     try {
-      //      probe.expectMsg(timeout.duration, ContainerReady(true))
       probe.expectMsgPF(timeout.duration) {
         case ContainerReady(true, _, _) => // all good
         case ContainerReady(false, good, bad) => // bad
@@ -52,6 +51,13 @@ trait BlendedIntegrationTestSupport {
         val extendedStatus = "\nRefer to log file to find out which condition failed."
         throw new AssertionError(e.getMessage() + extendedStatus, e.getCause())
     }
+
+    configuredContainer(ctProxy)
+  }
+
+  def configuredContainer(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit) : Future[Map[String, ContainerUnderTest]] = {
+    implicit val eCtxt = testKit.system.dispatcher
+    (ctProxy ? ConfiguredContainers_?).mapTo[ConfiguredContainers].map(_.cuts)
   }
 
   def stopContainers(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): Unit = {
