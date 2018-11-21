@@ -1,17 +1,19 @@
 package blended.itestsupport.condition
 
 import akka.actor.{Actor, ActorLogging}
+import blended.util.logging.Logger
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * An Actor to be used by [[AsyncCondition]].
  */
-abstract class AsyncChecker extends Actor with ActorLogging {
+abstract class AsyncChecker extends Actor {
 
   import AsyncChecker._
 
-  protected implicit val ctxt = context.system.dispatcher
+  protected implicit val ctxt : ExecutionContext= context.system.dispatcher
+  private[this] val log : Logger = Logger[AsyncChecker]
 
   case object Tick
 

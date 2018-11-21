@@ -4,6 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import blended.itestsupport.condition.AsyncCondition
 import blended.jolokia.model.JolokiaVersion
 import blended.jolokia.protocol._
+import blended.util.logging.Logger
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -14,7 +15,7 @@ object JolokiaAvailableCondition {
     user: Option[String] = None,
     pwd: Option[String] = None
   )(implicit actorSys: ActorSystem) =
-    AsyncCondition(Props(JolokiaAvailableChecker(url, user, pwd)), s"JolokiaAvailableCondition(${url})", t)
+    AsyncCondition(Props(JolokiaAvailableChecker(url, user, pwd)), s"JolokiaAvailableCondition($url)", t)
 }
 
 private[jolokia] object JolokiaAvailableChecker {
@@ -22,7 +23,7 @@ private[jolokia] object JolokiaAvailableChecker {
     url: String,
     userName: Option[String] = None,
     userPwd: Option[String] = None
-  ) = new JolokiaAvailableChecker(url, userName, userPwd)
+  ): JolokiaAvailableChecker = new JolokiaAvailableChecker(url, userName, userPwd)
 }
 
 private[jolokia] class JolokiaAvailableChecker(
@@ -31,16 +32,16 @@ private[jolokia] class JolokiaAvailableChecker(
   userPwd: Option[String] = None
 ) extends JolokiaChecker(url, userName, userPwd) with JolokiaAssertion {
 
-  override def toString = s"JolokiaAvailableCondition(${url})"
+  private val log : Logger = Logger[JolokiaAvailableChecker]
 
-  override def jolokiaRequest = GetJolokiaVersion
+  override def toString: String = s"JolokiaAvailableCondition($url)"
 
-  override def assertJolokia = { msg =>
-    msg match {
-      case v: JolokiaVersion =>
-        log.info(s"Jolokia [$v] discovered.")
-        true
-      case _ => false
-    }
+  override def jolokiaRequest : Any = GetJolokiaVersion
+
+  override def assertJolokia: Any => Boolean = {
+    case v: JolokiaVersion =>
+      log.info(s"Jolokia [$v] discovered.")
+      true
+    case _ => false
   }
 }
