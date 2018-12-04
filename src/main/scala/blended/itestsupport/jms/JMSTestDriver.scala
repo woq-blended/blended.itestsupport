@@ -13,7 +13,7 @@ abstract class JMSTestDriver {
 
   val cf: ConnectionFactory
 
-  private[this] val system = ActorSystem("JMSTestDriver")
+  private[this] implicit val system = ActorSystem("JMSTestDriver")
 
   private[this] val dummyResolver : String => Try[String] = { s => Success(s) }
 
@@ -30,7 +30,6 @@ abstract class JMSTestDriver {
 
     system.actorOf(ProducerControlActor.props(new BlendedSingleConnectionFactory(
       config = jmsConfig,
-      system = system,
       bundleContext = None
     )))
   }
