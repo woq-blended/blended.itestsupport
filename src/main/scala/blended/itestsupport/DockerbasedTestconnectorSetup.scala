@@ -65,6 +65,7 @@ class DockerbasedTestconnectorSetup
       result match {
         case Right(cuts) =>
           log.info("Configuring Test Connector ...")
+          TestConnector.put("ctProxy", self)
           configure(cuts)
           context.become(working(cuts, containerMgr))
           // We will answer with a ConfiguredContainer message
