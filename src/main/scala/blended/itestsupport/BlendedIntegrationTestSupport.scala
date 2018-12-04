@@ -1,25 +1,20 @@
 package blended.itestsupport
 
 import java.io.{ByteArrayOutputStream, File, FileOutputStream}
-import java.net.Socket
-import java.security.cert.X509Certificate
 
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.testkit.{TestKit, TestProbe}
 import akka.util.Timeout
 import akka.util.Timeout.durationToTimeout
-import blended.itestsupport.BlendedTestContextManager._
-import blended.itestsupport.TestContextCreator.TestContextRequest
+import blended.itestsupport.DockerbasedTestconnectorSetup._
 import blended.itestsupport.compress.TarFileSupport
 import blended.itestsupport.condition.ConditionActor.{CheckCondition, ConditionCheckResult}
 import blended.itestsupport.condition.{Condition, ConditionActor}
 import blended.itestsupport.docker.protocol._
 import blended.util.logging.Logger
-import javax.net.ssl._
-import org.apache.camel.CamelContext
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 trait BlendedIntegrationTestSupport {
@@ -28,11 +23,12 @@ trait BlendedIntegrationTestSupport {
 
   val testOutput: String = System.getProperty("projectTestOutput", "")
 
-  def testContext(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): CamelContext = {
+  // The ctProxy needs to be an Actor inheriting from DockerbasedTestconnectorSetup
+  def startContainers(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): Map[String, ContainerUnderTest] = {
     val probe = new TestProbe(testKit.system)
     val cuts : Map[String, ContainerUnderTest] = ContainerUnderTest.containerMap(testKit.system.settings.config)
-    ctProxy.tell(TestContextRequest(cuts), probe.ref)
-    probe.receiveN(1, timeout.duration).head.asInstanceOf[CamelContext]
+    ctProxy.tell(StartContainerManager(cuts), probe.ref)
+    probe.receiveN(1, timeout.duration).head.asInstanceOf[ConfiguredContainers].cuts
   }
 
   def containerReady(ctProxy: ActorRef)(implicit timeout: Timeout, testKit: TestKit): Future[Map[String, ContainerUnderTest]] = {
@@ -68,36 +64,6 @@ trait BlendedIntegrationTestSupport {
     testKit.system.log.debug(s"stopProbe [${probe.ref}]")
     ctProxy.tell(StopContainerManager(timeout.duration), probe.ref)
     probe.expectMsg(timeout.duration, ContainerManagerStopped)
-  }
-
-  def disableSSLClientVerification(): Unit = {
-
-    val trustAllCerts = Array[TrustManager](new X509ExtendedTrustManager {
-
-      override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
-      override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String, socket: Socket): Unit = {}
-      override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String, sslEngine: SSLEngine): Unit = {}
-
-      override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
-      override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String, socket: Socket): Unit = {}
-      override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String, sslEngine: SSLEngine): Unit = {}
-
-      override def getAcceptedIssuers: Array[X509Certificate] = Array.empty
-    })
-
-    val allHostsValid : HostnameVerifier = new HostnameVerifier() {
-      override def verify(s: String, sslSession: SSLSession): Boolean = true
-    }
-
-    val sc : SSLContext = {
-      val result = SSLContext.getInstance("SSL")
-      result.init(null, trustAllCerts, new java.security.SecureRandom())
-      SSLContext.setDefault(result)
-      result
-    }
-
-    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
   }
 
   def writeContainerDirectory(
