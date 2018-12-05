@@ -6,6 +6,7 @@ import blended.util.logging.Logger
 
 import scala.reflect.ClassTag
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 object TestConnector {
 
@@ -15,16 +16,15 @@ object TestConnector {
 
   def put(key : String, value : Any) : Unit = connectProperties.put(key, value)
 
-  def property[T](key : String)(implicit clazz : ClassTag[T]) : Option[T] = {
-    val result = Option(connectProperties.get(key)) match {
+  def property[T](key : String)(implicit clazz : ClassTag[T]) : Try[T] = {
+    Option(connectProperties.get(key)) match {
       case Some(t) if clazz.runtimeClass.isAssignableFrom(t.getClass) =>
-        Some(t.asInstanceOf[T])
+        Success(t.asInstanceOf[T])
       case _ =>
-        None
+        val msg = s"Failed to look up property [$key] from TestConnector"
+        log.debug(msg)
+        Failure(new Exception(msg))
     }
-
-    log.debug(s"TestConnector property [$key] is [$result]")
-    result
   }
 
   def properties : Map[String, Any] = connectProperties.asScala.toMap
