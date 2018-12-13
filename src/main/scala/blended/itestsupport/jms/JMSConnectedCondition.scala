@@ -51,10 +51,10 @@ private[jms] class JMSConnectedChecker(
 
   override def assertJolokia(obj: Try[JolokiaObject]): Boolean = obj match {
     case Success(r : JolokiaReadResult) =>
-      val stat = r.attributes.get("Status")
+      val stat : String = r.attributes.get("Status").map(_.toString()).getOrElse("")
 
       log.debug(s"Status for connection [$vendor:$provider] is [$stat]")
-      stat.map(_.toString()).contains("true")
+      stat.equals(""""connected"""")
     case _ => false
   }
 }
