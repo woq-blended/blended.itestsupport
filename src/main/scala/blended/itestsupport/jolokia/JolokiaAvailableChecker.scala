@@ -2,11 +2,11 @@ package blended.itestsupport.jolokia
 
 import akka.actor.{ActorSystem, Props}
 import blended.itestsupport.condition.AsyncCondition
-import blended.jolokia.model.JolokiaVersion
-import blended.jolokia.protocol._
+import blended.jolokia.{JolokiaClient, JolokiaObject, JolokiaVersion}
 import blended.util.logging.Logger
 
 import scala.concurrent.duration.FiniteDuration
+import scala.util.{Success, Try}
 
 object JolokiaAvailableCondition {
   def apply(
@@ -30,16 +30,16 @@ private[jolokia] class JolokiaAvailableChecker(
   url: String,
   userName: Option[String] = None,
   userPwd: Option[String] = None
-) extends JolokiaChecker(url, userName, userPwd) with JolokiaAssertion {
+) extends JolokiaChecker(url, userName, userPwd) {
 
   private val log : Logger = Logger[JolokiaAvailableChecker]
 
   override def toString: String = s"JolokiaAvailableCondition($url)"
 
-  override def jolokiaRequest : Any = GetJolokiaVersion
+  override def exec(client: JolokiaClient): Try[JolokiaObject] = client.version
 
-  override def assertJolokia: Any => Boolean = {
-    case v: JolokiaVersion =>
+  override def assertJolokia(obj: Try[JolokiaObject]): Boolean = obj match {
+    case Success(v : JolokiaVersion) =>
       log.info(s"Jolokia [$v] discovered.")
       true
     case _ => false

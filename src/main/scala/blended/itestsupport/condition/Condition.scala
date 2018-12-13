@@ -1,6 +1,6 @@
 package blended.itestsupport.condition
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.concurrent.duration._
 
@@ -19,13 +19,13 @@ trait Condition {
   def timeout   : FiniteDuration = defaultTimeout
   def interval  : FiniteDuration = defaultInterval
 
-  lazy val config = {
+  lazy val config : Config = {
     val config = ConfigFactory.load()
     config.getConfig("blended.itestsupport.condition")
   }
 
-  override def toString = s"Condition($description, $timeout)"
+  override def toString: String = s"Condition($description, $timeout)"
 
-  private[this] def defaultTimeout = config.getLong("defaultTimeout").millis
-  private[this] def defaultInterval = config.getLong("checkfrequency").millis
+  private[this] def defaultTimeout : FiniteDuration = config.getLong("defaultTimeout").millis
+  private[this] def defaultInterval : FiniteDuration = config.getLong("checkfrequency").millis
 }

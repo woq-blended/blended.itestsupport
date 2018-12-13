@@ -32,10 +32,6 @@ private[jms] class JMSChecker(cf: ConnectionFactory) extends AsyncChecker with J
 
   override def performCheck(cond: AsyncCondition): Future[Boolean] = {
 
-    // FIXME: find out, if we want some timeout here
-    // commented out, because it was not used
-    //    implicit val t = Timeout(5.seconds)
-
     log.debug(s"Checking JMS connection...[$cf]")
 
     if ((!connected.get()) && (!connecting.get())) {

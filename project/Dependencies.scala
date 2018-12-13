@@ -10,10 +10,9 @@ object Dependencies {
   private[this] val camelVersion = "2.19.5"
 
   private[this] def akka(m: String) : ModuleID = "com.typesafe.akka" %% s"akka-${m}" % akkaVersion
-  private[this] def akka_Http(m: String) = "com.typesafe.akka" %% s"akka-${m}" % akkaHttpVersion
+  private[this] def akka_Http(m: String): ModuleID = "com.typesafe.akka" %% s"akka-${m}" % akkaHttpVersion
   private[this] def blended(module: String) : ModuleID = "de.wayofquality.blended" %% module % blendedCoreVersion
-
-
+  
   val activeMqBroker = "org.apache.activemq" % "activemq-broker" % activeMqVersion
   val activeMqKahadbStore = "org.apache.activemq" % "activemq-kahadb-store" % activeMqVersion
   val akkaActor = akka("actor")

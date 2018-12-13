@@ -1,38 +1,21 @@
 package blended.itestsupport.jolokia
 
-import akka.actor._
-import akka.pattern._
-import akka.util.Timeout
 import blended.itestsupport.condition.{AsyncChecker, AsyncCondition}
-import blended.jolokia.{JolokiaAddress, JolokiaClient}
+import blended.jolokia.{JolokiaAddress, JolokiaClient, JolokiaObject}
 
-trait JolokiaAssertion {
-  def jolokiaRequest : Any
-  def assertJolokia  : Any => Boolean
-}
+import scala.concurrent.Future
+import scala.util.Try
 
-class JolokiaChecker(url: String, userName: Option[String], password: Option[String]) extends AsyncChecker {
-  this: JolokiaAssertion =>
+abstract class JolokiaChecker(url: String, userName: Option[String], password: Option[String]) extends AsyncChecker {
 
-  var jolokiaConnector : Option[ActorRef] = None
+  def exec(client : JolokiaClient) : Try[JolokiaObject]
+  def assertJolokia(obj : Try[JolokiaObject]) : Boolean
 
-  object JolokiaConnector {
-    def apply(url: String, userName: Option[String], userPwd: Option[String]) =
-      new JolokiaClient with JolokiaAddress {
-        override val jolokiaUrl = url
-        override val user       = userName
-        override val password   = userPwd
-      }
-  }
+  val client : JolokiaClient = new JolokiaClient(JolokiaAddress(
+    jolokiaUrl = url, user = userName, password = password
+  ))
 
-  override def preStart() : Unit = {
-    jolokiaConnector = Some(context.actorOf(Props(JolokiaConnector(url, userName, password))))
-  }
-
-  override def performCheck(condition: AsyncCondition) = {
-    implicit val t = Timeout(condition.timeout)
-    (jolokiaConnector.get ? jolokiaRequest).map { result =>
-      assertJolokia(result)
-    }
+  override def performCheck(condition: AsyncCondition): Future[Boolean] = Future {
+    assertJolokia(exec(client))
   }
 }

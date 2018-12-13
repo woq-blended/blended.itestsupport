@@ -3,6 +3,8 @@ package blended.itestsupport.condition
 import akka.actor.Props
 import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable}
 
+import scala.concurrent.ExecutionContext
+
 object ConditionActor {
   def props(cond: Condition): Props = cond match {
     case pc: ParallelComposedCondition => ParallelConditionActor.props(pc)
@@ -30,10 +32,10 @@ object ConditionActor {
   }
 
   object ConditionCheckResult {
-    def apply(results: List[ConditionCheckResult]) = {
+    def apply(results: List[ConditionCheckResult]): ConditionCheckResult = {
       new ConditionCheckResult(
-        results.map { r => r.satisfied }.flatten,
-        results.map { r => r.timedOut }.flatten
+        results.flatMap { r => r.satisfied },
+        results.flatMap { r => r.timedOut }
       )
     }
   }
@@ -47,14 +49,14 @@ class ConditionActor(cond: Condition) extends Actor with ActorLogging {
 
   case object Check
 
-  implicit val ctxt = context.system.dispatcher
+  implicit val ctxt : ExecutionContext = context.system.dispatcher
 
-  def receive = initializing
+  def receive: Receive = initializing
 
   def initializing: Receive = {
     case CheckCondition =>
       val requestor = sender()
-      log.debug(s"Checking condition [${cond.description}] with timeout [${cond.timeout}] on behalf of [${requestor}]")
+      log.debug(s"Checking condition [${cond.description}] with timeout [${cond.timeout}] on behalf of [$requestor]")
       val timer = context.system.scheduler.scheduleOnce(cond.timeout, self, Tick)
       context.become(checking(requestor, timer))
       self ! Check
@@ -65,25 +67,25 @@ class ConditionActor(cond: Condition) extends Actor with ActorLogging {
       log.warning(
         s"""
            |
-           |You have sent another CheckCondition message from [${sender}],
-           |but this actor is already checking on behalf of [${checkingFor}].
+           |You have sent another CheckCondition message from [$sender],
+           |but this actor is already checking on behalf of [$checkingFor].
            |
          """.stripMargin
       )
     case Check => cond.satisfied match {
       case true =>
-        log.info(s"Condition [${cond}] is now satisfied.")
+        log.info(s"Condition [$cond] is now satisfied.")
         timer.cancel()
         val response = ConditionCheckResult(List(cond), List.empty)
-        log.debug(s"Answering [${response}] to [${checkingFor}]")
+        log.debug(s"Answering [$response] to [$checkingFor]")
         checkingFor ! response
         context.stop(self)
       case false =>
         context.system.scheduler.scheduleOnce(cond.interval, self, Check)
     }
     case Tick =>
-      log.info(s"Condition [${cond}] hast timed out.")
-      log.debug(s"Answering to [${checkingFor}]")
+      log.info(s"Condition [$cond] hast timed out.")
+      log.debug(s"Answering to [$checkingFor]")
       checkingFor ! ConditionCheckResult(List.empty, List(cond))
       context.stop(self)
   }

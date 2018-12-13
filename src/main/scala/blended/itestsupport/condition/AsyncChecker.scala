@@ -1,6 +1,6 @@
 package blended.itestsupport.condition
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.Actor
 import blended.util.logging.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,7 +21,7 @@ abstract class AsyncChecker extends Actor {
 
   def performCheck(condition: AsyncCondition): Future[Boolean]
 
-  def receive = initializing
+  def receive: Receive = initializing
 
   def initializing: Receive = {
     case CheckAsyncCondition(condition) =>
@@ -33,7 +33,7 @@ abstract class AsyncChecker extends Actor {
   def checking(condition: AsyncCondition): Receive = {
     case Tick =>
       log.debug(s"Checking asynchronous [${condition.description}] condition ....")
-      performCheck(condition).map(_ match {
+      performCheck(condition).map{
         case true =>
           log.debug(s"Asynchronous condition [${condition.description}] is now satisfied.")
           condition.isSatisfied.set(true)
@@ -41,7 +41,7 @@ abstract class AsyncChecker extends Actor {
         case false =>
           log.debug(s"Scheduling next condition check in [${condition.interval}]")
           context.system.scheduler.scheduleOnce(condition.interval, self, Tick)
-      })
+      }
   }
 }
 

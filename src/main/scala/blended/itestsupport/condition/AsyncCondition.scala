@@ -12,7 +12,7 @@ object AsyncCondition {
     asyncChecker: Props,
     desc: String,
     timeout: Option[FiniteDuration] = None
-  )(implicit system: ActorSystem) = timeout match {
+  )(implicit system: ActorSystem): AsyncCondition = timeout match {
     case None => new AsyncCondition(asyncChecker, desc)
     case Some(d) => new AsyncCondition(asyncChecker, desc) {
       override def timeout = d
@@ -21,7 +21,7 @@ object AsyncCondition {
 }
 
 /**
- * An [[Condition]] that checks it's condition asynchronuesly by utilizing an [[AsyncChecker]].
+ * A [[Condition]] that checks it's condition asynchronously by utilizing an [[AsyncChecker]].
  * To implement your own async condition, derive from [[AsyncChecker]].
  */
 class AsyncCondition(asyncCheckerProps: Props, desc: String)(implicit val system: ActorSystem)
