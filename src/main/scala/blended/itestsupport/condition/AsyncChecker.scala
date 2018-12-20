@@ -51,5 +51,4 @@ object AsyncChecker {
    * Use this object to kick off an Asynchronous checker.
    */
   case class CheckAsyncCondition(condition: AsyncCondition)
-
 }

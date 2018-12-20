@@ -2,8 +2,8 @@ package blended.itestsupport.condition
 
 import akka.actor.Props
 import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable}
-
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 object ConditionActor {
   def props(cond: Condition): Props = cond match {
@@ -46,16 +46,18 @@ class ConditionActor(cond: Condition) extends Actor with ActorLogging {
   import ConditionActor._
 
   case object Tick
-
   case object Check
 
   implicit val ctxt : ExecutionContext = context.system.dispatcher
+  private var start : Long = 0l
 
   def receive: Receive = initializing
 
   def initializing: Receive = {
     case CheckCondition =>
+      start = System.currentTimeMillis()
       val requestor = sender()
+      System.out.println(s"Starting to check [$cond]")
       log.debug(s"Checking condition [${cond.description}] with timeout [${cond.timeout}] on behalf of [$requestor]")
       val timer = context.system.scheduler.scheduleOnce(cond.timeout, self, Tick)
       context.become(checking(requestor, timer))
@@ -74,7 +76,10 @@ class ConditionActor(cond: Condition) extends Actor with ActorLogging {
       )
     case Check => cond.satisfied match {
       case true =>
-        log.info(s"Condition [$cond] is now satisfied.")
+        val duration = (System.currentTimeMillis() - start).millis
+        val msg = s"Condition [$cond] is satisfied after [${duration.toMillis}ms]."
+        System.out.println(msg)
+        log.info(msg)
         timer.cancel()
         val response = ConditionCheckResult(List(cond), List.empty)
         log.debug(s"Answering [$response] to [$checkingFor]")
@@ -84,7 +89,9 @@ class ConditionActor(cond: Condition) extends Actor with ActorLogging {
         context.system.scheduler.scheduleOnce(cond.interval, self, Check)
     }
     case Tick =>
-      log.info(s"Condition [$cond] hast timed out.")
+      val msg = s"Condition [$cond] hast timed out."
+      log.info(msg)
+      System.out.println(msg)
       log.debug(s"Answering to [$checkingFor]")
       checkingFor ! ConditionCheckResult(List.empty, List(cond))
       context.stop(self)

@@ -1,8 +1,27 @@
 package blended.itestsupport.condition
 
+import akka.actor.ActorSystem
+import akka.pattern.ask
+import akka.util.Timeout
+import blended.itestsupport.condition.ConditionActor.{CheckCondition, ConditionCheckResult}
 import com.typesafe.config.{Config, ConfigFactory}
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.util.Try
+
+object Condition {
+
+  def verify(cond : Condition)(implicit system : ActorSystem) : Try[Boolean] = Try {
+
+    implicit val timeout : Timeout = Timeout(cond.timeout)
+
+    val actor = system.actorOf(ConditionActor.props(cond))
+    val result : ConditionCheckResult = Await.result((actor ? CheckCondition).mapTo[ConditionCheckResult], cond.timeout)
+
+    result.allSatisfied
+  }
+}
 
 /**
  * A Condition encapsulates an assertion that may change over time. The use case is to

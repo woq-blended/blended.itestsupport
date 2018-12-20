@@ -2,7 +2,7 @@ package blended.itestsupport
 
 import java.io.{ByteArrayOutputStream, File, FileOutputStream}
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.testkit.{TestKit, TestProbe}
 import akka.util.Timeout
@@ -73,10 +73,10 @@ trait BlendedIntegrationTestSupport {
     file: File,
     user: Int = 0,
     group: Int = 0
-  )(implicit timeout: Timeout, testKit: TestKit): Future[WriteContainerDirectoryResult] = {
+  )(implicit timeout: Timeout, system: ActorSystem): Future[WriteContainerDirectoryResult] = {
 
     logger.info(s"Writing directory [${file.getAbsolutePath()}] to [$ctName:$target]")
-    implicit val eCtxt = testKit.system.dispatcher
+    implicit val eCtxt = system.dispatcher
 
     val bos = new ByteArrayOutputStream()
     TarFileSupport.tar(file, bos, user, group)
@@ -89,10 +89,10 @@ trait BlendedIntegrationTestSupport {
     }
   }
 
-  def readContainerDirectory(ctProxy: ActorRef, ctName: String, dirName: String)(implicit timeout: Timeout, testKit: TestKit): Future[GetContainerDirectoryResult] = {
+  def readContainerDirectory(ctProxy: ActorRef, ctName: String, dirName: String)(implicit timeout: Timeout, system: ActorSystem): Future[GetContainerDirectoryResult] = {
 
     logger.info(s"Reading container directory [$ctName:$dirName]")
-    implicit val eCtxt = testKit.system.dispatcher
+    implicit val eCtxt = system.dispatcher
 
     ctProxy.ask(ConfiguredContainer_?(ctName)).mapTo[ConfiguredContainer].flatMap { cc =>
       cc.cut match {
@@ -121,9 +121,9 @@ trait BlendedIntegrationTestSupport {
 
   def execContainerCommand(
     ctProxy: ActorRef, ctName: String, cmdTimeout: FiniteDuration, user: String, cmd: String*
-  )(implicit timeout: Timeout, testKit: TestKit): Future[ExecuteContainerCommandResult] = {
+  )(implicit timeout: Timeout, system: ActorSystem): Future[ExecuteContainerCommandResult] = {
 
-    implicit val eCtxt = testKit.system.dispatcher
+    implicit val eCtxt = system.dispatcher
 
     ctProxy.ask(ConfiguredContainer_?(ctName)).mapTo[ConfiguredContainer].flatMap { cc =>
       cc.cut match {
@@ -134,11 +134,11 @@ trait BlendedIntegrationTestSupport {
     }
   }
 
-  def assertCondition(condition: Condition)(implicit testKit: TestKit): Boolean = {
+  def assertCondition(condition: Condition)(implicit system: ActorSystem): Boolean = {
 
-    implicit val eCtxt = testKit.system.dispatcher
+    implicit val eCtxt = system.dispatcher
 
-    val checker = testKit.system.actorOf(ConditionActor.props(condition))
+    val checker = system.actorOf(ConditionActor.props(condition))
 
     val checkFuture = (checker ? CheckCondition)(condition.timeout).map {
       case cr: ConditionCheckResult => cr.allSatisfied
