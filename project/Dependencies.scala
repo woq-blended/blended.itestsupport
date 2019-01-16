@@ -5,7 +5,7 @@ object Dependencies {
   private[this] val activeMqVersion = "5.15.6"
   private[this] val akkaHttpVersion = "10.1.5"
   private[this] val akkaVersion = "2.5.19"
-  private[this] val blendedCoreVersion = "3.0-M2-SNAPSHOT"
+  private[this] val blendedCoreVersion = "3.0-M3-SNAPSHOT"
   private[this] val dockerJavaVersion = "3.0.13"
   private[this] val camelVersion = "2.19.5"
 
