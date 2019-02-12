@@ -16,8 +16,17 @@ object DockerClientFactory {
     case Some(dockerClient) => dockerClient
     case _ =>
 
-      val dockerConfig =  DefaultDockerClientConfig.createDefaultConfigBuilder()
-        .withDockerHost("tcp://" + config.getString("docker.host") + ":" + config.getString("docker.port"))
+      val configDockerHost = Option(config.getString("docker.host")).getOrElse("")
+      val dockerHost = if (configDockerHost.startsWith("unix://")) {
+        configDockerHost
+      } else if (configDockerHost.isEmpty) {
+        "unix:///var/run/docker.sock"
+      } else {
+        "tcp://" + config.getString("docker.host") + ":" + config.getString("docker.port")
+      }
+
+      val dockerConfig = DefaultDockerClientConfig.createDefaultConfigBuilder()
+        .withDockerHost(dockerHost)
         .withRegistryUsername(config.getString("docker.user"))
         .withRegistryPassword(config.getString("docker.password"))
         .withRegistryEmail(config.getString("docker.eMail"))
