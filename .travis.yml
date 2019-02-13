@@ -1,31 +1,43 @@
 language: scala
-scala: 2.12.6
+
 jdk: oraclejdk8
-script:
-- sbt ciBuild
+
+# We define the script in the build matrix
+script: echo "No script specified" && false
+
 cache:
   directories:
-  - "$HOME/.m2"
-  - "$HOME/.ivy2"
-  - "$HOME/.sbt"
+    - "$HOME/.m2"
+    - "$HOME/.ivy2"
+    - "$HOME/.sbt"
+
 before_cache:
-- rm -Rf $HOME/.ivy2/.sbt.ivy.lock ; rm -Rf $HOME/.ivy2/local ; rm -Rf $HOME/.m2/repository/de/wayofquality/blended
+  - rm -Rf $HOME/.ivy2/.sbt.cache.lock
+  - rm -Rf $HOME/.ivy2/.sbt.ivy.lock
 
-env:
-  global:
+matrix:
+  include:
+    - stage: Prerequisites (level -4) blended sbt plugins
+      script:
+        - sh -e scripts/build-prereq.sh sbt-testlogconfig
+        - sh -e scripts/build-prereq.sh sbt-jbake
+        - sh -e scripts/build-prereq.sh sbt-filterresources
 
+    - stage: Prerequisites (level -3) blended core
+      script: sh -e scripts/build-prereq.sh blended
+
+    - stage: Build
+      script: sbt ciBuild
+
+    - stage: VerifyPublish
+      script: "./verifyPublish.sh"
+
+    - stage: Deploy
+      script: "./runPublish.sh"
 
 stages:
-- name: VerifyPublish
-  if: branch = publish AND type = push
-- Test
-- name: Deploy
-  if: branch = publish AND type = push
-jobs:
-  include:
-  - stage: VerifyPublish
-    script: "./verifyPublish.sh"
-  - stage: Test
-    script: sbt ciBuild
-  - stage: Deploy
-    script: "./runPublish.sh"
+  - name: VerifyPublish
+    if: branch = publish AND type = push
+
+  - name: Deploy
+    if: branch = publish AND type = push
