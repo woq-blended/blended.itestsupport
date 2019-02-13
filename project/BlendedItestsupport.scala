@@ -63,10 +63,10 @@ object BlendedItestsupport {
         Dependencies.camelCore, 
         Dependencies.camelJms,
 
-        Dependencies.blendedUtilLogging,
-        Dependencies.blendedJmsUtils,
-        Dependencies.blendedJolokia,
-        Dependencies.blendedTestsupport,
+        Blended.utilLogging,
+        Blended.jmsUtils,
+        Blended.jolokia,
+        Blended.testSupport,
 
         Dependencies.commonsCompress,
         Dependencies.dockerJava,

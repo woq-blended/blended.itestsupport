@@ -34,5 +34,9 @@ object BuildHelper {
       isSnapshot := buildVersion.endsWith("SNAPSHOT")
     )
   }
-  
+
+  def readAsVersion(versionFile: File): String = {
+    Files.readAllLines(versionFile.toPath()).get(0).trim()
+  }
+
 }
