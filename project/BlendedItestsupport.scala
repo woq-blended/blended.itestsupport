@@ -67,6 +67,7 @@ object BlendedItestsupport {
         Dependencies.blendedJmsUtils,
         Dependencies.blendedJolokia,
         Dependencies.blendedTestsupport,
+        Dependencies.blendedSecuritySsl,
 
         Dependencies.commonsCompress,
         Dependencies.dockerJava,

@@ -18,6 +18,7 @@ object TestConnector {
 
   def property[T](key : String)(implicit clazz : ClassTag[T]) : Try[T] = {
     Option(connectProperties.get(key)) match {
+      // TODO: Is the condition correct or should it be t.getClass.isAssignableFrom ... ??
       case Some(t) if clazz.runtimeClass.isAssignableFrom(t.getClass) =>
         Success(t.asInstanceOf[T])
       case _ =>

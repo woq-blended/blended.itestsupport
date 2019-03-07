@@ -5,7 +5,7 @@ object Dependencies {
   private[this] val activeMqVersion = "5.15.6"
   private[this] val akkaHttpVersion = "10.1.5"
   private[this] val akkaVersion = "2.5.19"
-  private[this] val blendedCoreVersion = "3.0-M5"
+  private[this] val blendedCoreVersion = "3.0-M6-SNAPSHOT"
   private[this] val dockerJavaVersion = "3.0.13"
   private[this] val camelVersion = "2.19.5"
 
@@ -21,6 +21,7 @@ object Dependencies {
   val akkaTestkit = akka("testkit")
   val akktHttpTestkit = akka_Http("http-testkit")
 
+  val blendedSecuritySsl = blended("blended.security.ssl")
   val blendedJmsUtils = blended("blended.jms.utils")
   val blendedJolokia = blended("blended.jolokia")
   val blendedUtilLogging = blended("blended.util.logging")

@@ -10,28 +10,24 @@ import scala.util.{Success, Try}
 object MBeanExistsCondition {
 
   def apply(
-    url: String,
-    user: Option[String] = None,
-    pwd: Option[String] = None,
+    client: JolokiaClient,
     searchDef: MBeanSearchDef,
     t : Option[FiniteDuration] = None
   )(implicit system: ActorSystem): AsyncCondition =
     AsyncCondition(
-      Props(MBeanExistsChecker(url, user, pwd, searchDef)),
-      s"MBeanExistsCondition($url, ${searchDef.pattern}})",
+      Props(MBeanExistsChecker(client, searchDef)),
+      s"MBeanExistsCondition(${client.url}, ${searchDef.pattern}})",
       t
     )
 }
 
 object CamelContextExistsCondition {
   def apply(
-    url: String,
-    user: Option[String] = None,
-    pwd: Option[String] = None,
+    client : JolokiaClient,
     contextName : String,
     t : Option[FiniteDuration] = None
   )(implicit system: ActorSystem): AsyncCondition = MBeanExistsCondition(
-    url, user, pwd,
+    client,
     MBeanSearchDef (
       jmxDomain = "org.apache.camel",
       searchProperties = Map(
@@ -44,13 +40,11 @@ object CamelContextExistsCondition {
 
 object JmsBrokerExistsCondition {
   def apply(
-    url: String,
-    user: Option[String] = None,
-    pwd: Option[String] = None,
+    client : JolokiaClient,
     brokerName : String,
     t : Option[FiniteDuration] = None
   )(implicit system: ActorSystem): AsyncCondition = MBeanExistsCondition(
-    url, user, pwd,
+    client,
     MBeanSearchDef (
       jmxDomain = "org.apache.activemq",
       searchProperties = Map(
@@ -63,21 +57,17 @@ object JmsBrokerExistsCondition {
 
 private[jolokia] object MBeanExistsChecker {
   def apply(
-    url: String,
-    user: Option[String] = None,
-    pwd: Option[String] = None,
+    client : JolokiaClient,
     searchDef: MBeanSearchDef
-  ): MBeanExistsChecker = new MBeanExistsChecker(url, user, pwd, searchDef)
+  ): MBeanExistsChecker = new MBeanExistsChecker(client, searchDef)
 }
 
 private[jolokia] class MBeanExistsChecker(
-  url: String,
-  userName: Option[String] = None,
-  userPwd: Option[String] = None,
+  client : JolokiaClient,
   searchDef : MBeanSearchDef
-) extends JolokiaChecker(url, userName, userPwd) {
+) extends JolokiaChecker(client) {
 
-  override def toString: String = s"MbeanExistsCondition($url, ${searchDef.pattern}})"
+  override def toString: String = s"MbeanExistsCondition(${client.url}, ${searchDef.pattern}})"
 
   override def exec(client : JolokiaClient) : Try[JolokiaObject] = client.search(searchDef)
 

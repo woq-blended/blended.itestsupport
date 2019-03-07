@@ -89,7 +89,7 @@ class ConditionActor(cond: Condition) extends Actor with ActorLogging {
         context.system.scheduler.scheduleOnce(cond.interval, self, Check)
     }
     case Tick =>
-      val msg = s"Condition [$cond] hast timed out."
+      val msg = s"Condition [$cond] has timed out."
       log.info(msg)
       System.out.println(msg)
       log.debug(s"Answering to [$checkingFor]")
