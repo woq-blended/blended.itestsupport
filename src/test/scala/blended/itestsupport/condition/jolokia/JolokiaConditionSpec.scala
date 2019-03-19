@@ -5,10 +5,11 @@ import blended.itestsupport.condition.{Condition, ConditionActor}
 import blended.itestsupport.jolokia.JolokiaAvailableCondition
 import blended.testsupport.TestActorSys
 import org.scalatest.{Matchers, WordSpec}
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import blended.itestsupport.condition.ConditionActor.CheckCondition
 import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
+import blended.jolokia.{JolokiaAddress, JolokiaClient}
 
 class JolokiaConditionSpec extends WordSpec
   with Matchers {
@@ -21,7 +22,8 @@ class JolokiaConditionSpec extends WordSpec
 
       val t = 10.seconds
 
-      val condition = JolokiaAvailableCondition("http://localhost:7777/jolokia", Some(t))
+      val client : JolokiaClient = new JolokiaClient(JolokiaAddress("http://localhost:7777/jolokia"))
+      val condition = JolokiaAvailableCondition(client, Some(t))
 
       val checker = TestActorRef(ConditionActor.props(cond = condition))
       checker.tell(CheckCondition, probe.ref)
@@ -33,9 +35,10 @@ class JolokiaConditionSpec extends WordSpec
       implicit val system = testkit.system
       val probe = TestProbe()
 
-      val t = 10.seconds
+      val t = 5.seconds
 
-      val condition = JolokiaAvailableCondition("http://localhost:8888/jolokia", Some(t))
+      val client : JolokiaClient = new JolokiaClient(JolokiaAddress("http://localhost:8888/jolokia"))
+      val condition = JolokiaAvailableCondition(client, Some(t))
 
       val checker = TestActorRef(ConditionActor.props(cond = condition))
       checker.tell(CheckCondition, probe.ref)

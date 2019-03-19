@@ -17,4 +17,3 @@ object Blended extends blended.sbt.Blended {
   override def blendedVersion: String = BuildHelper.readAsVersion(new File("version.txt"))
 
 }
-

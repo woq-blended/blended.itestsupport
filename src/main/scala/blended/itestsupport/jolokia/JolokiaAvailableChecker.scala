@@ -10,31 +10,25 @@ import scala.util.{Success, Try}
 
 object JolokiaAvailableCondition {
   def apply(
-    url: String,
+    client : JolokiaClient,
     t: Option[FiniteDuration] = None,
-    user: Option[String] = None,
-    pwd: Option[String] = None
   )(implicit actorSys: ActorSystem) =
-    AsyncCondition(Props(JolokiaAvailableChecker(url, user, pwd)), s"JolokiaAvailableCondition($url)", t)
+    AsyncCondition(Props(JolokiaAvailableChecker(client)), s"JolokiaAvailableCondition(${client.url})", t)
 }
 
 private[jolokia] object JolokiaAvailableChecker {
   def apply(
-    url: String,
-    userName: Option[String] = None,
-    userPwd: Option[String] = None
-  ): JolokiaAvailableChecker = new JolokiaAvailableChecker(url, userName, userPwd)
+    client : JolokiaClient
+  ): JolokiaAvailableChecker = new JolokiaAvailableChecker(client)
 }
 
 private[jolokia] class JolokiaAvailableChecker(
-  url: String,
-  userName: Option[String] = None,
-  userPwd: Option[String] = None
-) extends JolokiaChecker(url, userName, userPwd) {
+  client: JolokiaClient
+) extends JolokiaChecker(client) {
 
   private val log : Logger = Logger[JolokiaAvailableChecker]
 
-  override def toString: String = s"JolokiaAvailableCondition($url)"
+  override def toString: String = s"JolokiaAvailableCondition(${client.url}])"
 
   override def exec(client: JolokiaClient): Try[JolokiaObject] = client.version
 

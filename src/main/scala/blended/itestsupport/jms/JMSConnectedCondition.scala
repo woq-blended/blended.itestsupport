@@ -12,26 +12,22 @@ import scala.util.{Success, Try}
 object JMSConnectedCondition {
 
   def apply(
-    jmxUrl : String,
-    jmxUser: Option[String], jmxPwd: Option[String],
+    client : JolokiaClient,
     vendor: String,
     provider: String,
     t : Option[FiniteDuration] = None
   )(implicit system: ActorSystem) = AsyncCondition(
-    Props(new JMSConnectedChecker(jmxUrl, jmxUser, jmxPwd, vendor, provider)),
+    Props(new JMSConnectedChecker(client, vendor, provider)),
     s"JMSConnectedChecker($vendor, $provider)",
     t
   )
-
 }
 
 private[jms] class JMSConnectedChecker(
-  url : String,
-  user : Option[String],
-  pwd: Option[String],
+  client : JolokiaClient,
   vendor : String,
   provider : String
-) extends JolokiaChecker(url, user, pwd) {
+) extends JolokiaChecker(client) {
 
   private val log : Logger = Logger[JMSConnectedChecker]
 

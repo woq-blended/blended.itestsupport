@@ -60,13 +60,14 @@ object BlendedItestsupport {
         Dependencies.akkaTestkit,
         Dependencies.akktHttpTestkit,
 
-        Dependencies.camelCore, 
+        Dependencies.camelCore,
         Dependencies.camelJms,
 
         Blended.utilLogging,
         Blended.jmsUtils,
         Blended.jolokia,
         Blended.testSupport,
+        Blended.securitySsl,
 
         Dependencies.commonsCompress,
         Dependencies.dockerJava,
