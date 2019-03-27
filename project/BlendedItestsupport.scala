@@ -57,8 +57,10 @@ object BlendedItestsupport {
 
         Dependencies.akkaActor,
         Dependencies.akkaCamel,
+        Dependencies.akkaStream,
+        Dependencies.akkaStreamTestkit,
         Dependencies.akkaTestkit,
-        Dependencies.akktHttpTestkit,
+        Dependencies.akkaHttpTestkit,
 
         Dependencies.camelCore,
         Dependencies.camelJms,
