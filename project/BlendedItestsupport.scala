@@ -74,13 +74,14 @@ object BlendedItestsupport {
 
         Dependencies.sttp,
 
-        Dependencies.jolokiaJvmAgent % "runtime",
+        Dependencies.jolokiaJvmAgent % Runtime,
 
-        Dependencies.akkaSlf4j % "test",
-        Dependencies.logbackCore % "test",
-        Dependencies.logbackClassic % "test",
+        Dependencies.akkaSlf4j % Test,
+        Dependencies.akkaStream % Test,
+        Dependencies.logbackCore % Test,
+        Dependencies.logbackClassic % Test,
 
-        Dependencies.mockitoAll % "test"
+        Dependencies.mockitoAll % Test
       ),
 
       Test / javaOptions += ("-DprojectTestOutput=" + (Test / classDirectory).value),
@@ -93,6 +94,7 @@ object BlendedItestsupport {
       Test / testlogDirectory := target.value,
       Test / testlogLogToConsole := false,
       Test / testlogLogToFile := true,
+      Test / testlogDefaultLevel := "debug",
 
       Test / resourceGenerators += (Test / testlogCreateConfig).taskValue
     )
