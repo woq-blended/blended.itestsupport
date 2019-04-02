@@ -3,15 +3,16 @@ package blended.itestsupport.docker
 import scala.concurrent.{Await, Future}
 
 import akka.pattern._
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.event.LoggingReceive
 import akka.util.Timeout
 import blended.itestsupport.ContainerUnderTest
 import com.github.dockerjava.api.DockerClient
 import scala.concurrent.duration._
+
 import blended.itestsupport.docker.protocol._
 
-class DockerContainerHandler(implicit client: DockerClient) extends Actor with ActorLogging {
+class DockerContainerHandler(client: DockerClient) extends Actor with ActorLogging {
 
   implicit private[this] val timeout = Timeout(3.seconds)
   implicit private[this] val eCtxt = context.system.dispatcher
@@ -107,7 +108,7 @@ class DockerContainerHandler(implicit client: DockerClient) extends Actor with A
 
   private[this] def startContainer(cut : ContainerUnderTest) : ActorRef = {
 
-    val actor = context.actorOf(ContainerActor.props(cut), cut.ctName)
+    val actor = context.actorOf(ContainerActor.props(cut, client), cut.ctName)
     actor ! StartContainer(cut.ctName)
 
     log.debug(s"Container Actor is [$actor]")
@@ -115,4 +116,8 @@ class DockerContainerHandler(implicit client: DockerClient) extends Actor with A
     actor
   }
 
+}
+
+object DockerContainerHandler {
+  def props(dockerClient: DockerClient): Props = Props(new DockerContainerHandler(dockerClient))
 }

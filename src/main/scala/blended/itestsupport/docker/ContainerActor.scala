@@ -13,28 +13,16 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 import scala.util.control.NonFatal
 
-class ContainerActor(container: ContainerUnderTest)(implicit client: DockerClient) extends Actor with ActorLogging {
+class ContainerActor(container: ContainerUnderTest, dockerClient: DockerClient) extends Actor with ActorLogging {
 
-  private[this] val dc = new DockerContainer(container)
+  private[this] val dc = new DockerContainer(container)(dockerClient)
   private[this] implicit val eCtxt   = context.dispatcher
   implicit val timeout = new Timeout(5.seconds)
 
-  case object PerformStart
-
-  class ContainerStartActor() extends Actor with ActorLogging {
-
-    def receive = LoggingReceive {
-      case PerformStart =>
-        dc.startContainer
-        sender() ! ContainerStarted(Right(container))
-        self ! PoisonPill
-    }
-  }
-
   def stopped : Receive = LoggingReceive {
     case StartContainer(n) if container.ctName == n  => {
-      val starter = context.actorOf(Props( new ContainerStartActor()))
-      starter ! PerformStart
+      val starter = context.actorOf(ContainerStartActor.props())
+      starter ! ContainerStartActor.PerformStart(dc, container)
       context.become(starting(sender()))
     }
   }
@@ -81,7 +69,7 @@ class ContainerActor(container: ContainerUnderTest)(implicit client: DockerClien
       }
 
     case StopContainer => {
-      new DockerContainer(cut).stopContainer
+      new DockerContainer(cut)(dockerClient).stopContainer
       context become stopped
       log.debug(s"Sending stopped message to [$sender]")
       sender ! ContainerStopped(Right(container.ctName))
@@ -92,5 +80,24 @@ class ContainerActor(container: ContainerUnderTest)(implicit client: DockerClien
 }
 
 object ContainerActor {
-  def props(cut: ContainerUnderTest)(implicit client: DockerClient): Props = Props(new ContainerActor(cut))
+  def props(cut: ContainerUnderTest, dockerClient: DockerClient): Props = Props(new ContainerActor(cut, dockerClient))
+}
+
+class ContainerStartActor() extends Actor with ActorLogging {
+  import ContainerStartActor._
+
+  def receive = LoggingReceive {
+    case PerformStart(dc, container) =>
+      dc.startContainer
+      sender() ! ContainerStarted(Right(container))
+      self ! PoisonPill
+  }
+}
+
+object ContainerStartActor {
+
+  def props(): Props = Props(new ContainerStartActor())
+
+  case class PerformStart(dc: DockerContainer, cut: ContainerUnderTest)
+
 }
