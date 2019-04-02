@@ -65,6 +65,7 @@ class DockerContainerHandler(implicit client: DockerClient) extends Actor with A
         startContainer(cut)
         context.become(starting(requestor, pending, cut :: startingContainers, runningContainers))
       case Left(e) =>
+        log.error("DependenciesStarted received with an Left (means: error)", e)
         context.stop(self)
     }
   }

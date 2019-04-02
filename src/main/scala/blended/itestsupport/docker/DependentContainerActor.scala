@@ -41,7 +41,8 @@ class DependentContainerActor(container: ContainerUnderTest) extends Actor with 
             log.debug(s"$pendingContainers")
             context.become(waiting(l, newLinks))
         }
-      case Left(e) => 
+      case Left(e) =>
+        log.error("ContainerStarted received with an Left (means: error)", e)
         sender ! DependenciesStarted(Left(e))
         context.stop(self)
       }
