@@ -21,7 +21,7 @@ class DockerContainerMapperSpec extends WordSpec
       val probe = TestProbe()
 
       val cuts = ContainerUnderTest.containerMap(system.settings.config)
-      val mapper = system.actorOf(Props(new DockerContainerMapper))
+      val mapper = system.actorOf(Props(new DockerContainerMapperActor))
       
       mapper.tell(InternalMapDockerContainers(probe.ref, cuts, mockClient), probe.ref)
       

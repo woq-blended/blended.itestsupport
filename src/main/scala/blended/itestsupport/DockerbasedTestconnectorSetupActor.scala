@@ -1,14 +1,13 @@
 package blended.itestsupport
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.pattern._
 import blended.akka.MemoryStash
 import blended.itestsupport.condition.ConditionActor.CheckCondition
 import blended.itestsupport.condition.ConditionActor.ConditionCheckResult
 import blended.itestsupport.condition.{Condition, ConditionActor, ConditionProvider}
-import blended.itestsupport.docker.{ContainerManager, DockerClientFactory, DockerClientProvider}
+import blended.itestsupport.docker.{ContainerManagerActor}
 import blended.itestsupport.docker.protocol._
-import com.github.dockerjava.api.DockerClient
 
 /**
   * This class encapsulates the start sequence of all configured docker containers
@@ -33,22 +32,17 @@ import com.github.dockerjava.api.DockerClient
   * !!! Note : The TestConnector information is also used to execute the conditions
   *     checking if the containers are ready to go for the tests.
   */
-class DockerbasedTestconnectorSetup
+class DockerbasedTestconnectorSetupActor
   extends Actor
   with ActorLogging
   with MemoryStash { this: TestConnectorSetup =>
 
-  import DockerbasedTestconnectorSetup._
+  import DockerbasedTestconnectorSetupActor._
 
   def initializing: Receive = {
     case req: StartContainerManager =>
       log.debug("Starting container infractructure for test execution ...")
-      val containerMgr = context.actorOf(Props(new ContainerManager with DockerClientProvider {
-        override def getClient: DockerClient = {
-          implicit val logger = context.system.log
-          DockerClientFactory(context.system.settings.config)
-        }
-      }), "ContainerMgr")
+      val containerMgr = context.actorOf(ContainerManagerActor.props(), "ContainerMgr")
 
       // Kick off to start the containers
       containerMgr ! StartContainerManager(req.containerUnderTest)
@@ -137,7 +131,7 @@ class DockerbasedTestconnectorSetup
   def receive = initializing orElse stashing
 }
 
-object DockerbasedTestconnectorSetup {
+object DockerbasedTestconnectorSetupActor {
 
   case object ContainerReady_?
   case class ContainerReady(ready: Boolean, succeeded: List[String], failed: List[String])

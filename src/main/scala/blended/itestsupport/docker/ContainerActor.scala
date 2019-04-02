@@ -13,10 +13,6 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 import scala.util.control.NonFatal
 
-object ContainerActor {
-  def props(cut: ContainerUnderTest)(implicit client: DockerClient): Props = Props(new ContainerActor(cut))
-}
-
 class ContainerActor(container: ContainerUnderTest)(implicit client: DockerClient) extends Actor with ActorLogging {
 
   private[this] val dc = new DockerContainer(container)
@@ -93,4 +89,8 @@ class ContainerActor(container: ContainerUnderTest)(implicit client: DockerClien
   }
 
   def receive = stopped
+}
+
+object ContainerActor {
+  def props(cut: ContainerUnderTest)(implicit client: DockerClient): Props = Props(new ContainerActor(cut))
 }

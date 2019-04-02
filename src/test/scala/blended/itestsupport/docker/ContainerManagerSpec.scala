@@ -14,7 +14,7 @@ class ContainerManagerSpec extends WordSpec
   with MockitoSugar {
   
   object TestContainerManager {
-    def apply() = new  ContainerManager with DockerClientProvider {
+    def apply() = new  ContainerManagerActor with DockerClientProvider {
       override def getClient = mockClient
     }
   }

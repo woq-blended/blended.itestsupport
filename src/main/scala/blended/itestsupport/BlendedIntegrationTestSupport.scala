@@ -7,7 +7,7 @@ import akka.pattern.ask
 import akka.testkit.{TestKit, TestProbe}
 import akka.util.Timeout
 import akka.util.Timeout.durationToTimeout
-import blended.itestsupport.DockerbasedTestconnectorSetup._
+import blended.itestsupport.DockerbasedTestconnectorSetupActor._
 import blended.itestsupport.compress.TarFileSupport
 import blended.itestsupport.condition.ConditionActor.{CheckCondition, ConditionCheckResult}
 import blended.itestsupport.condition.{Condition, ConditionActor}
