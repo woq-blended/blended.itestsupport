@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
 import scala.util.control.NonFatal
 
 object ContainerActor {
-  def apply(container: ContainerUnderTest)(implicit client: DockerClient) = new ContainerActor(container)
+  def props(cut: ContainerUnderTest)(implicit client: DockerClient): Props = Props(new ContainerActor(cut))
 }
 
 class ContainerActor(container: ContainerUnderTest)(implicit client: DockerClient) extends Actor with ActorLogging {

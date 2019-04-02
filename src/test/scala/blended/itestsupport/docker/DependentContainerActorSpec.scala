@@ -33,7 +33,7 @@ class DependentContainerActorSpec extends WordSpec
       )
       
       val container = new DockerContainer(cut)
-      val depActor = TestActorRef(Props(DependentContainerActor(cut)))
+      val depActor = TestActorRef(DependentContainerActor.props(cut))
 
       probe.watch(depActor)
 

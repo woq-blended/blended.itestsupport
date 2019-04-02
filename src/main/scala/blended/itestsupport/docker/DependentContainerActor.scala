@@ -1,6 +1,6 @@
 package blended.itestsupport.docker
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, Props}
 import akka.event.LoggingReceive
 import blended.itestsupport.docker.protocol._
 import blended.itestsupport.{ContainerLink, ContainerUnderTest}
@@ -49,5 +49,5 @@ class DependentContainerActor(container: ContainerUnderTest) extends Actor with 
 }
 
 object DependentContainerActor {
-  def apply(container : ContainerUnderTest) = new DependentContainerActor(container)
+  def props(cut: ContainerUnderTest): Props = Props(new DependentContainerActor(cut))
 }

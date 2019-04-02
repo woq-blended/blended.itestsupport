@@ -177,7 +177,7 @@ class DockerContainerHandler(implicit client: DockerClient) extends Actor with A
       val withDeps = cuts.values.filter( _.links.nonEmpty).toList
       
       val pending  = withDeps.map { cut =>
-        ( context.actorOf(Props(DependentContainerActor(cut))), cut )
+        ( context.actorOf(DependentContainerActor.props(cut)), cut )
       }
 
       noDeps.foreach{ startContainer }
@@ -259,7 +259,7 @@ class DockerContainerHandler(implicit client: DockerClient) extends Actor with A
 
   private[this] def startContainer(cut : ContainerUnderTest) : ActorRef = {
 
-    val actor = context.actorOf(Props(ContainerActor(cut)), cut.ctName)
+    val actor = context.actorOf(ContainerActor.props(cut), cut.ctName)
     actor ! StartContainer(cut.ctName)
     
     log.debug(s"Container Actor is [$actor]")
