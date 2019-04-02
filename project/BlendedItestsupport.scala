@@ -44,7 +44,7 @@ object BlendedItestsupport {
         "-target", "1.8"
       ),
 
-      scalaVersion := "2.12.6",
+      scalaVersion := Dependencies.scalaVersion,
       scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint", "-Ywarn-nullary-override"),
 
       sourcesInBase := false,
