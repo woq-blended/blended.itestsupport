@@ -50,7 +50,7 @@ private[jms] class JMSConnectedChecker(
       val stat : String = r.attributes.get("Status").map(_.toString()).getOrElse("")
 
       log.debug(s"Status for connection [$vendor:$provider] is [$stat]")
-      stat.equals(""""connected"""")
+      stat.equals(""""Connected"""")
     case _ => false
   }
 }
