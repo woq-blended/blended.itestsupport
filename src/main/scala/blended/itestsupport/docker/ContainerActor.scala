@@ -21,6 +21,7 @@ class ContainerActor(container: ContainerUnderTest, dockerClient: DockerClient) 
 
   def stopped : Receive = LoggingReceive {
     case StartContainer(n) if container.ctName == n  => {
+      println(s"Starting container [${container.ctName}]")
       val starter = context.actorOf(ContainerStartActor.props())
       starter ! ContainerStartActor.PerformStart(dc, container)
       context.become(starting(sender()))
@@ -30,6 +31,7 @@ class ContainerActor(container: ContainerUnderTest, dockerClient: DockerClient) 
   def starting(requestor : ActorRef) : Receive = LoggingReceive {
     case msg : ContainerStarted =>
       requestor ! msg
+      println(s"Container [${container.ctName}] has been started.")
       context become started(container)
   }
 
@@ -50,7 +52,7 @@ class ContainerActor(container: ContainerUnderTest, dockerClient: DockerClient) 
         val result = TarFileSupport.untar(dc.getContainerDirectory(gcd.dir))
         log.info(s"Extracted [${result.size}] entries for directory [${gcd.dir}] from container [${container.ctName}]")
         log.info(s"Extracted entries are [${result.keys.mkString(", ")}]")
-        log.debug(s"Sending container director response to [${requestor.path}]")
+        log.debug(s"Sending container directory response to [${requestor.path}]")
         requestor ! GetContainerDirectoryResult(Right(ContainerDirectory(gcd.container, gcd.dir, result)))
       } catch {
         case NonFatal(t) => requestor ! GetContainerDirectoryResult(Left(t))
