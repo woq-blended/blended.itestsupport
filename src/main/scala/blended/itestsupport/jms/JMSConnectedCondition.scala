@@ -3,6 +3,7 @@ package blended.itestsupport.jms
 import akka.actor.{ActorSystem, Props}
 import blended.itestsupport.condition.AsyncCondition
 import blended.itestsupport.jolokia.JolokiaChecker
+import blended.jms.utils.Connected
 import blended.jolokia.{JolokiaClient, JolokiaObject, JolokiaReadResult, MBeanSearchDef}
 import blended.util.logging.Logger
 
@@ -50,7 +51,7 @@ private[jms] class JMSConnectedChecker(
       val stat : String = r.attributes.get("Status").map(_.toString()).getOrElse("")
 
       log.debug(s"Status for connection [$vendor:$provider] is [$stat]")
-      stat.equals(""""Connected"""")
+      stat.equals(s""""${Connected.toString()}"""")
     case _ => false
   }
 }
