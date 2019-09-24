@@ -13,7 +13,7 @@ object BlendedItestsupport {
     .settings(
       organization := "de.wayofquality.blended",
       homepage := Some(url("https://github.com/woq-blended/blended.itestsupport")),
-      
+
       moduleName := "blended.itestsupport",
 
       publishMavenStyle := true,
@@ -56,14 +56,10 @@ object BlendedItestsupport {
         Dependencies.activeMqBroker,
 
         Dependencies.akkaActor,
-        Dependencies.akkaCamel,
         Dependencies.akkaStream,
         Dependencies.akkaStreamTestkit,
         Dependencies.akkaTestkit,
         Dependencies.akkaHttpTestkit,
-
-        Dependencies.camelCore,
-        Dependencies.camelJms,
 
         Blended.utilLogging,
         Blended.jmsUtils,
