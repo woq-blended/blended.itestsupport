@@ -35,17 +35,17 @@ object NamedContainerPort {
 
   def apply(config : Config) : NamedContainerPort = {
     val privatePort = config.getInt("private")
-    val publicPort = if (config.hasPath("public")) 
+    val publicPort = if (config.hasPath("public"))
       config.getInt("public")
     else
       nextFreePort()
 
     NamedContainerPort(config.getString("name"), privatePort, publicPort)
-  }   
+  }
 }
 
 case class NamedContainerPort(
-  name: String, 
+  name: String,
   privatePort: Int,
   publicPort: Int
 ) {
@@ -54,9 +54,9 @@ case class NamedContainerPort(
 
 object VolumeConfig {
   def apply(config : Config) : VolumeConfig = VolumeConfig(
-    config.getString("host"), 
+    config.getString("host"),
     config.getString("container")
-  )  
+  )
 }
 
 case class VolumeConfig(
@@ -66,7 +66,7 @@ case class VolumeConfig(
 
 object ContainerLink {
   def apply(config: Config) : ContainerLink = ContainerLink(
-    config.getString("container"), 
+    config.getString("container"),
     config.getString("hostname")
   )
 }
@@ -81,29 +81,29 @@ object ContainerUnderTest {
   def containerMap(config: Config) : Map[String, ContainerUnderTest] = config.getConfigList("docker.containers").asScala.map { cfg =>
       ContainerUnderTest(cfg)
     }.toList.map( ct => (ct.ctName, ct)).toMap
-      
+
   def apply(config : Config) : ContainerUnderTest = {
-    
+
     val volumes : List[VolumeConfig] = if (config.hasPath("volumes"))
       config.getConfigList("volumes").asScala.map{cfg: Config => VolumeConfig(cfg)}.toList
     else
       List.empty
-    
+
     val ports : List[NamedContainerPort] = if (config.hasPath("ports"))
       config.getConfigList("ports").asScala.map { cfg: Config => NamedContainerPort(cfg) }.toList
-    else 
+    else
       List.empty
-    
+
     val links : List[ContainerLink] = if (config.hasPath("links"))
       config.getConfigList("links").asScala.map { cfg: Config => ContainerLink(cfg) }.toList
-    else 
+    else
       List.empty
-    
+
     val ctName = config.getString("name")
-    
-    val dockerName : String = if (config.hasPath("dockerName")) 
+
+    val dockerName : String = if (config.hasPath("dockerName"))
       config.getString("dockerName")
-    else 
+    else
       s"${ctName}_${System.currentTimeMillis}"
 
     val env : Map[String, String] = if (config.hasPath("env")) {
@@ -123,7 +123,7 @@ object ContainerUnderTest {
       env = env
     )
   }
-} 
+}
 
 case class ContainerUnderTest(
   ctName          : String,
@@ -131,13 +131,20 @@ case class ContainerUnderTest(
   imgId           : String,
   dockerName      : String,
   volumes         : List[VolumeConfig] = List.empty,
-  links           : List[ContainerLink] = List.empty,                             
+  links           : List[ContainerLink] = List.empty,
   ports           : Map[String, NamedContainerPort] = Map.empty,
   env             : Map[String, String] = Map.empty
 ) {
-  
+
   val DEFAULT_PROTOCOL = "tcp"
-  
+
+  def port(portName : String) : Int = {
+    ports.get(portName) match {
+      case None => 65000
+      case Some(p) => p.publicPort
+    }
+  }
+
   def url(
     portName: String,
     host: String = "127.0.0.1",
@@ -145,17 +152,12 @@ case class ContainerUnderTest(
     user: Option[String] = None,
     pwd: Option[String] = None
   ) : String = {
-    val port = ports.get(portName) match {
-      case None => 65000
-      case Some(p) => p.publicPort
-    }
-
     val cred = (user, pwd) match {
       case (None, _) => ""
       case (Some(u), None) => s"$u@"
       case (Some(u), Some(p)) => s"$u:$p@"
     }
 
-    s"$protocol://$cred$host:$port"
+    s"$protocol://$cred$host:${port(portName)}"
   }
 }
