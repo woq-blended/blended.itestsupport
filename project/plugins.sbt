@@ -11,5 +11,5 @@ addSbtPlugin("de.wayofquality.sbt" % "sbt-testlogconfig" % "0.1.0")
 // Contains project dependency information from blended project as sbt plugin
 //libraryDependencies ++= Seq(
 addSbtPlugin(
-  "de.wayofquality.blended" % "blended.dependencies" % "3.1-RC6"
+  "de.wayofquality.blended" % "blended.dependencies" % "3.1-SNAPSHOT"
 )
